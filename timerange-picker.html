@@ -43,44 +43,96 @@ Example:
         max-height: 100px;
         max-width: 100px;
       }
-      #container{
+      #timerange{
         display:inline-block;
+        width: 300px;
+        float: left;
+        border-right:1px;
+            border-right-width: 1px;
+            /*border-right-style: solid;*/
+        padding: 0 0 0 20px;
+            padding-top: 0px;
+            padding-right: 0px;
+            padding-bottom: 0px;
+            padding-left: 20px;
+      }
+      #quickrange{
+        padding: 0 20px 0 30px;
+            padding-top: 0px;
+            padding-right: 20px;
+            padding-bottom: 0px;
+            padding-left: 30px;
+        min-height: 258px;
+        float: left;
+      }
+      #listbox{
+        padding: 0 20px 0 30px;
+            padding-top: 0px;
+            padding-right: 20px;
+            padding-bottom: 0px;
+            padding-left: 30px;
+        min-height: 258px;
+        float: left;
       }
     </style>
     <paper-button toggles active="{{opened}}">Time picker</paper-button>
     <paper-dialog opened="{{opened}}" id="dialog" modal class="paper-time-picker-dialog">
-      <div id="container">
+      <div id="timerange">
         <h2>Time Range</h2>
-        <h4>From:</h4>
-        <paper-input label=""></paper-input>
-        <paper-button toggles active="{{fromDateTimeOpen}}"><iron-icon icon="calendar"></iron-icon>pick</paper-button>
-        <h4>To:</h4>
-        <paper-input label=""></paper-input>
-        <paper-dropdown-menu label="Refreshing every:">
-          <paper-listbox class="dropdown-content" selected="1">
-            <paper-item>5s</paper-item>
-            <paper-item>10s</paper-item>
-            <paper-item>30s</paper-item>
-            <paper-item>1m</paper-item>
-          </paper-listbox>
-        </paper-dropdown-menu>
-        <div class="buttons">
-          <paper-button dialog-dismiss>Cancel</paper-button>
-          <paper-button dialog-confirm>OK</paper-button>
-        </div>
+          <h4>From:</h4>
+          <paper-input label="now-7d/d"></paper-input>
+          <paper-button toggles active="{{fromDateTimeOpen}}"><iron-icon icon="calendar"></iron-icon>pick</paper-button>
+          <h4>To:</h4>
+          <paper-input label="now-7d/d"></paper-input>
+          <paper-dropdown-menu label="Refreshing every:">
+            <paper-listbox class="dropdown-content" selected="1">
+              <paper-item>5s</paper-item>
+              <paper-item>10s</paper-item>
+              <paper-item>30s</paper-item>
+              <paper-item>1m</paper-item>
+            </paper-listbox>
+          </paper-dropdown-menu>
+          <div class="buttons">
+            <paper-button dialog-confirm>Apply</paper-button>
+            <paper-button dialog-dismiss>Cancel</paper-button>
+          </div>
       </div>
-      <div id="container">
+      <div id="quickrange">
         <h2>Quick Ranges</h2>
-        <div role="listbox">
-          <paper-item>Last 7 days</paper-item>
-          <paper-item>Last 30 days</paper-item>
-          <paper-item>Last 60 days</paper-item>
-          <paper-item>Last 90 days</paper-item>
-          <paper-item>Last 6 months</paper-item>
-          <paper-item>Last 1 year</paper-item>
-          <paper-item>Last 2 year</paper-item>
-          <paper-item>Last 5 year</paper-item>
-        </div>
+          <div id="listbox" role="listbox">
+            <paper-item>Last 7 days</paper-item>
+            <paper-item>Last 30 days</paper-item>
+            <paper-item>Last 60 days</paper-item>
+            <paper-item>Last 90 days</paper-item>
+            <paper-item>Last 6 months</paper-item>
+            <paper-item>Last 1 year</paper-item>
+            <paper-item>Last 2 year</paper-item>
+            <paper-item>Last 5 year</paper-item>
+          </div>
+          <div id="listbox" role="listbox">
+            <paper-item>Yesterday</paper-item>
+            <paper-item>Day before yesterday</paper-item>
+            <paper-item>This day last week</paper-item>
+            <paper-item>Previous week</paper-item>
+            <paper-item>Previous month</paper-item>
+            <paper-item>Previous year</paper-item>
+          </div>
+          <div id="listbox" role="listbox">
+            <paper-item>Today</paper-item>
+            <paper-item>This week</paper-item>
+            <paper-item>This month</paper-item>
+            <paper-item>This year</paper-item>
+          </div>
+          <div id="listbox" role="listbox">
+            <paper-item>Last 5 minutes</paper-item>
+            <paper-item>Last 15 minutes</paper-item>
+            <paper-item>Last 30 minutes</paper-item>
+            <paper-item>Last 1 hours</paper-item>
+            <paper-item>Last 3 hours</paper-item>
+            <paper-item>Last 6 hours</paper-item>
+            <paper-item>Last 12 hours</paper-item>
+            <paper-item>Last 24 hours</paper-item>
+          </div>
       </div>
     </paper-dialog>
     <paper-dialog id="datetime" opened="{{fromDateTimeOpen}}">
