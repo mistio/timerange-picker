@@ -1,14 +1,13 @@
-<script src="../platform/platform.js"></script>
-
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../../components/paper-date-picker/paper-date-picker.html">
 <link rel="import" href="../../components/paper-time-picker/paper-time-picker.html">
 <link rel="import" href="../../components/paper-button/paper-button.html">
 <link rel="import" href="../../components/paper-input/paper-input.html">
 <link rel="import" href="../../components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../../components/paper-listbox/paper-listbox.html">
+<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/paper-item/paper-item.html">
-
 
 <!-- <link rel="import" href="../../components/md-timepicker/md-timepicker.html"> -->
 
@@ -54,6 +53,7 @@ Example:
         <h2>Time Range</h2>
         <h4>From:</h4>
         <paper-input label=""></paper-input>
+        <paper-button toggles active="{{fromDateTimeOpen}}"><iron-icon icon="calendar"></iron-icon>pick</paper-button>
         <h4>To:</h4>
         <paper-input label=""></paper-input>
         <paper-dropdown-menu label="Refreshing every:">
@@ -64,7 +64,6 @@ Example:
             <paper-item>1m</paper-item>
           </paper-listbox>
         </paper-dropdown-menu>
-        <paper-date-picker id="picker" date="[[date]]"></paper-date-picker>
         <div class="buttons">
           <paper-button dialog-dismiss>Cancel</paper-button>
           <paper-button dialog-confirm>OK</paper-button>
@@ -84,7 +83,13 @@ Example:
         </div>
       </div>
     </paper-dialog>
-    <paper-time-picker></paper-time-picker>
+    <paper-dialog id="datetime" opened="{{fromDateTimeOpen}}">
+      <h2>select datetime</h2>
+      <div>
+        <paper-date-picker id="picker" date="[[date]]"></paper-date-picker>
+        <paper-time-picker></paper-time-picker>
+      </div>
+    </paper-dialog>
   </template>
 
   <script>
@@ -97,6 +102,7 @@ Example:
          * while checking its pocket watch.
          */
         opened: Boolean,
+        fromDateTimeOpen: Boolean,
 
         /**
          * Describes the author of the element, but is really just an excuse to
