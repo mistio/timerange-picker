@@ -8,22 +8,11 @@
 <link rel="import" href="../../components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../components/paper-item/paper-item.html">
+<link rel="import" href="../../components/iron-icons/iron-icons.html">
+<link rel="import" href="../../components/iron-icons/editor-icons.html">
 
-<!-- <link rel="import" href="../../components/md-timepicker/md-timepicker.html"> -->
 
 <!--
-An element providing a solution to no problem in particular.
-
-Example:
-
-    <timerange-picker></timerange-picker>
-
-Example:
-
-    <timerange-picker>
-      <h2>Hello timerange-picker</h2>
-    </timerange-picker>
-
 @demo demo/index.html
 @hero hero.svg
 -->
@@ -49,8 +38,7 @@ Example:
         float: left;
         border-right:1px;
             border-right-width: 1px;
-            /*border-right-style: solid;*/
-        padding: 0 0 0 20px;
+            padding: 0 0 0 20px;
             padding-top: 0px;
             padding-right: 0px;
             padding-bottom: 0px;
@@ -74,18 +62,30 @@ Example:
         min-height: 258px;
         float: left;
       }
+      #from{
+        display:inline-block;
+      }
+      #to{
+        display:inline-block;
+      }
+      .buttons{
+        float: left;
+        margin-top:30px;
+      }
     </style>
     <paper-button toggles active="{{opened}}">Time picker</paper-button>
     <paper-dialog opened="{{opened}}" id="dialog" modal class="paper-time-picker-dialog">
       <div id="timerange">
         <h2>Time Range</h2>
           <h4>From:</h4>
-          <paper-input label="now-7d/d"></paper-input>
-          <paper-button toggles active="{{fromDateTimeOpen}}"><iron-icon icon="calendar"></iron-icon>pick</paper-button>
+          <paper-input id="from" value="{{mydate}} {{mytime}}"></paper-input>
+          <paper-button id="from" toggles active="{{fromDateTimeOpen}}"><iron-icon icon="editor:insert-invitation"></iron-icon></paper-button>
           <h4>To:</h4>
-          <paper-input label="now-7d/d"></paper-input>
+          <paper-input id="to" value="{{mydate2}} {{mytime2}}"></paper-input>
+          <paper-button id="to" toggles active="{{fromDateTimeOpen2}}"><iron-icon icon="editor:insert-invitation"></iron-icon></paper-button>
           <paper-dropdown-menu label="Refreshing every:">
-            <paper-listbox class="dropdown-content" selected="1">
+            <paper-listbox class="dropdown-content" selected="0">
+              <paper-item>off</paper-item>
               <paper-item>5s</paper-item>
               <paper-item>10s</paper-item>
               <paper-item>30s</paper-item>
@@ -98,48 +98,62 @@ Example:
           </div>
       </div>
       <div id="quickrange">
-        <h2>Quick Ranges</h2>
+        <h2 style="left:30px;">Quick Ranges</h2>
           <div id="listbox" role="listbox">
-            <paper-item>Last 7 days</paper-item>
-            <paper-item>Last 30 days</paper-item>
-            <paper-item>Last 60 days</paper-item>
-            <paper-item>Last 90 days</paper-item>
-            <paper-item>Last 6 months</paper-item>
-            <paper-item>Last 1 year</paper-item>
-            <paper-item>Last 2 year</paper-item>
-            <paper-item>Last 5 year</paper-item>
+            <paper-item id="range" fromtime="7" to="now" on-tap="computeDays">Last 7 days</paper-item>
+            <paper-item id="range" fromtime="30" to="now" on-tap="computeDays">Last 30 days</paper-item>
+            <paper-item id="range" fromtime="60" to="now" on-tap="computeDays">Last 60 days</paper-item>
+            <paper-item id="range" fromtime="90" to="now" on-tap="computeDays">Last 90 days</paper-item>
+            <paper-item id="range" fromtime="6" to="now" on-tap="computeMonths">Last 6 months</paper-item>
+            <paper-item id="range" fromtime="1" to="now" on-tap="computeYears">Last 1 year</paper-item>
+            <paper-item id="range" fromtime="2" to="now" on-tap="computeYears">Last 2 year</paper-item>
+            <paper-item id="range" fromtime="5" to="now" on-tap="computeYears">Last 5 year</paper-item>
           </div>
           <div id="listbox" role="listbox">
-            <paper-item>Yesterday</paper-item>
-            <paper-item>Day before yesterday</paper-item>
-            <paper-item>This day last week</paper-item>
-            <paper-item>Previous week</paper-item>
-            <paper-item>Previous month</paper-item>
-            <paper-item>Previous year</paper-item>
+            <paper-item id="range" fromtime="1" to="now" on-tap="computeTime">Yesterday</paper-item>
+            <paper-item id="range" fromtime="2" to="1" on-tap="computeTime">Day before yesterday</paper-item>
+            <paper-item id="range" fromtime="7" to="1" on-tap="computeTime">This day last week</paper-item>
+            <paper-item id="range" fromtime="1" to="1" on-tap="computeWeek">Previous week</paper-item>
+            <paper-item id="range" fromtime="1" to="1" on-tap="computeMonth">Previous month</paper-item>
+            <paper-item id="range" fromtime="1" to="1" on-tap="computeYear">Previous year</paper-item>
           </div>
           <div id="listbox" role="listbox">
-            <paper-item>Today</paper-item>
-            <paper-item>This week</paper-item>
-            <paper-item>This month</paper-item>
-            <paper-item>This year</paper-item>
+            <paper-item id="range" fromtime="0" to="0" on-tap="computeTime">Today</paper-item>
+            <paper-item id="range" fromtime="0" to="0" on-tap="computeWeek">This week</paper-item>
+            <paper-item id="range" fromtime="0" to="0" on-tap="computeMonth">This month</paper-item>
+            <paper-item id="range" fromtime="0" to="0" on-tap="computeYear">This year</paper-item>
           </div>
           <div id="listbox" role="listbox">
-            <paper-item>Last 5 minutes</paper-item>
-            <paper-item>Last 15 minutes</paper-item>
-            <paper-item>Last 30 minutes</paper-item>
-            <paper-item>Last 1 hours</paper-item>
-            <paper-item>Last 3 hours</paper-item>
-            <paper-item>Last 6 hours</paper-item>
-            <paper-item>Last 12 hours</paper-item>
-            <paper-item>Last 24 hours</paper-item>
+            <paper-item id="range" fromtime="5" to="now" on-tap="computeMinutes">Last 5 minutes</paper-item>
+            <paper-item id="range" fromtime="15" to="now" on-tap="computeMinutes">Last 15 minutes</paper-item>
+            <paper-item id="range" fromtime="30" to="now" on-tap="computeMinutes">Last 30 minutes</paper-item>
+            <paper-item id="range" fromtime="60" to="now" on-tap="computeMinutes">Last 1 hours</paper-item>
+            <paper-item id="range" fromtime="180" to="now" on-tap="computeMinutes">Last 3 hours</paper-item>
+            <paper-item id="range" fromtime="360" to="now" on-tap="computeMinutes">Last 6 hours</paper-item>
+            <paper-item id="range" fromtime="720" to="now" on-tap="computeMinutes">Last 12 hours</paper-item>
+            <paper-item id="range" fromtime="1440" to="now" on-tap="computeMinutes">Last 24 hours</paper-item>
           </div>
-      </div>
     </paper-dialog>
     <paper-dialog id="datetime" opened="{{fromDateTimeOpen}}">
-      <h2>select datetime</h2>
+      <h2>Select datetime</h2>
       <div>
-        <paper-date-picker id="picker" date="[[date]]"></paper-date-picker>
-        <paper-time-picker></paper-time-picker>
+        <paper-date-picker id="pickdate" date="{{date}}"></paper-date-picker>
+        <paper-time-picker id="picktime" time="{{time}}"></paper-time-picker>
+      </div>
+      <div class="buttons">
+        <paper-button dialog-confirm>Apply</paper-button>
+        <paper-button dialog-dismiss>Cancel</paper-button>
+      </div>
+    </paper-dialog>
+    <paper-dialog id="datetime" opened="{{fromDateTimeOpen2}}">
+      <h2>Select datetime</h2>
+      <div>
+        <paper-date-picker id="pickdate" date="{{date2}}"></paper-date-picker>
+        <paper-time-picker id="picktime" time="{{time2}}"></paper-time-picker>
+      </div>
+      <div class="buttons">
+        <paper-button dialog-confirm>Apply</paper-button>
+        <paper-button dialog-dismiss>Cancel</paper-button>
       </div>
     </paper-dialog>
   </template>
@@ -149,12 +163,48 @@ Example:
       is: 'timerange-picker',
 
       properties: {
-        /**
-         * `fancy` indicates that the element should don a monocle and tophat,
-         * while checking its pocket watch.
-         */
+
         opened: Boolean,
         fromDateTimeOpen: Boolean,
+        mydate: {
+          type:Date,
+          notify: true,
+        },
+        opened: Boolean,
+        fromDateTimeOpen2: Boolean,
+        mydate2: {
+          type:Date,
+          notify: true,
+        },
+        date: {
+          type:Date,
+          notify: true,
+          observer:"_dateChanged"
+        },
+        date2: {
+          type:Date,
+          notify: true,
+          observer:"_dateChanged2"
+        },
+        mytime:{
+          type:String,
+          notify: true,
+        },
+        mytime2:{
+          type:String,
+          notify: true,
+        },
+        time: {
+          type:String,
+          notify: true,
+          observer:"_timeChanged"
+        },
+        time2: {
+          type:String,
+          notify: true,
+          observer:"_timeChanged2"
+        },
+
 
         /**
          * Describes the author of the element, but is really just an excuse to
@@ -181,16 +231,174 @@ Example:
           }
         },
       },
-
-      // Element Lifecycle
-
-      ready: function() {
-        // `ready` is called after all elements have been configured, but
-        // propagates bottom-up. This element's children are ready, but parents
-        // are not.
-        //
-        // This is the point where you should make modifications to the DOM (when
-        // necessary), or kick off any processes the element wants to perform.
+      ready: function(){
+        this.mydate="";
+        this.mydate2="";
+        this.mytime="";
+        this.mytime2="";
+      },
+      getTime:function() {
+        var element = this.querySelector("#picktime");
+        var time = element.time;
+        this.mytime = time;
+      },
+      getTime2:function() {
+        var element = this.querySelector("#picktime");
+        var time = element.time2;
+        this.mytime2 = time;
+      },
+      _timeChanged:function(time,old){
+        this.mytime = time;
+        console.log('sdfsdf');
+      },
+      _timeChanged2:function(time,old){
+        this.mytime2 = time;
+        console.log('sdfsdf');
+      },
+      getDate:function() {
+        var element = this.querySelector("#pickdate");
+        var date = element.date;
+        this.mydate = date;
+      },
+      getDate2:function() {
+        var element = this.querySelector("#pickdate");
+        var date = element.date2;
+        this.mydate2 = date;
+      },
+      _dateChanged:function(date,old){
+        date = new Date(date || Date.now()),
+        month = '' + (date.getMonth() + 1),
+        day = '' + date.getDate(),
+        year = date.getFullYear();
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+        this.mydate=month+"-"+ day+"-"+ year;
+        console.log('sdfsdf');
+      },
+      _dateChanged2:function(date,old){
+        date = new Date(date || Date.now()),
+        month = '' + (date.getMonth() + 1),
+        day = '' + date.getDate(),
+        year = date.getFullYear();
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+        this.mydate2=month+"-"+ day+"-"+ year;
+        console.log('sdfsdf');
+      },
+      getCurrentDate:function(){
+        var currentDate = new Date()
+        var day = currentDate.getDate()
+        var month = currentDate.getMonth() + 1
+        var year = currentDate.getFullYear()
+        document.write("<b>" + day + "/" + month + "/" + year + "</b>")
+      },
+      computeDays: function(e){
+        var el=e.srcElement;
+        var fromtime=el.attributes.fromtime.value;
+        var to=el.attributes.to.value;
+        if(typeof to=="string" && to=="now"){
+          to=new Date();
+        }
+        var endpoint=to.toLocaleString();
+        to.setDate(to.getDate()-fromtime);
+        var startpoint=to.toLocaleString();
+        this.mydate=startpoint;
+        this.mydate2=endpoint;
+        console.log(startpoint,endpoint);
+      },
+      computeMonths: function(e){
+        var el=e.srcElement;
+        var fromtime=el.attributes.fromtime.value;
+        var to=el.attributes.to.value;
+        if(typeof to=="string" && to=="now"){
+          to=new Date();
+        }
+        var endpoint=to.toLocaleString();
+        to.setMonth(to.getMonth()-fromtime);
+        var startpoint=to.toLocaleString();
+        this.mydate=startpoint;
+        this.mydate2=endpoint;
+        console.log(startpoint,endpoint);
+      },
+      computeYears: function(e){
+        var el=e.srcElement;
+        var fromtime=el.attributes.fromtime.value;
+        var to=el.attributes.to.value;
+        if(typeof to=="string" && to=="now"){
+          to=new Date();
+        }
+        var endpoint=to.toLocaleString();
+        to.setFullYear(to.getUTCFullYear()-fromtime);
+        var startpoint=to.toLocaleString();
+        this.mydate=startpoint;
+        this.mydate2=endpoint;
+        console.log(startpoint,endpoint);
+      },
+      computeTime: function(e){
+        var el=e.srcElement;
+        var fromtime=el.attributes.fromtime.value;
+        var to=el.attributes.to.value;
+        if(typeof to=="string" && to=="now"){
+          to=new Date();
+        }
+        var endpoint=moment().subtract(fromtime,'days').endOf('day').format('MMMM Do YYYY, h:mm:ss a');
+        var startpoint=moment().subtract(fromtime,'days').startOf('day').format('MMMM Do YYYY, h:mm:ss a');
+        this.mydate=startpoint;
+        this.mydate2=endpoint;
+        console.log(startpoint,endpoint);
+      },
+      computeWeek: function(e){
+        var el=e.srcElement;
+        var fromtime=el.attributes.fromtime.value;
+        var to=el.attributes.to.value;
+        if(typeof to=="string" && to=="now"){
+          to=new Date();
+        }
+        var endpoint=moment().subtract(fromtime, 'weeks').endOf('isoWeek').format('MMMM Do YYYY, h:mm:ss a');
+        var startpoint=moment().subtract(fromtime, 'weeks').startOf('isoWeek').format('MMMM Do YYYY, h:mm:ss a');
+        this.mydate=startpoint;
+        this.mydate2=endpoint;
+        console.log(startpoint,endpoint);
+      },
+      computeMonth: function(e){
+        var el=e.srcElement;
+        var fromtime=el.attributes.fromtime.value;
+        var to=el.attributes.to.value;
+        if(typeof to=="string" && to=="now"){
+          to=new Date();
+        }
+        var endpoint=moment().subtract(fromtime,'months').endOf('month').format('MMMM Do YYYY, h:mm:ss a');
+        var startpoint=moment().subtract(fromtime,'months').startOf('month').format('MMMM Do YYYY, h:mm:ss a');
+        this.mydate=startpoint;
+        this.mydate2=endpoint;
+        console.log(startpoint,endpoint);
+      },
+      computeYear: function(e){
+        var el=e.srcElement;
+        var fromtime=el.attributes.fromtime.value;
+        var to=el.attributes.to.value;
+        if(typeof to=="string" && to=="now"){
+          to=new Date();
+        }
+        var endpoint=moment().subtract(fromtime,'years').endOf('year').format('MMMM Do YYYY, h:mm:ss a');
+        var startpoint=moment().subtract(fromtime,'years').startOf('year').format('MMMM Do YYYY, h:mm:ss a');
+        this.mydate=startpoint;
+        this.mydate2=endpoint;
+        console.log(startpoint,endpoint);
+      },
+      computeMinutes: function(e){
+        var el=e.srcElement;
+        var fromtime=el.attributes.fromtime.value;
+        var to=el.attributes.to.value;
+        if(typeof to=="string" && to=="now"){
+          to=new Date();
+        }
+        var endpoint=to.toLocaleString();
+        to.setMinutes(to.getMinutes()-fromtime);
+        var startpoint=to.toLocaleString();
+        this.mydate=startpoint;
+        this.mydate2=endpoint;
+        console.log(startpoint,endpoint);
       },
 
       attached: function() {
@@ -237,7 +445,7 @@ Example:
        */
       fireLasers: function() {
         this.fire('timerange-picker-lasers', {sound: 'Pew pew!'});
-      }
+      },
     });
   </script>
 </dom-module>
