@@ -38,9 +38,9 @@
         float: left;
         border-right:1px;
             border-right-width: 1px;
-            padding: 0 0 0 20px;
+            padding: 0 20 0 20px;
             padding-top: 0px;
-            padding-right: 0px;
+            padding-right: 20px;
             padding-bottom: 0px;
             padding-left: 20px;
       }
@@ -62,10 +62,10 @@
         min-height: 258px;
         float: left;
       }
-      #from{
+      .from{
         display:inline-block;
       }
-      #to{
+      .to{
         display:inline-block;
       }
       .buttons{
@@ -78,11 +78,11 @@
       <div id="timerange">
         <h2>Time Range</h2>
           <h4>From:</h4>
-          <paper-input id="from" value="{{mydate}} {{mytime}}"></paper-input>
-          <paper-button id="from" toggles active="{{fromDateTimeOpen}}"><iron-icon icon="editor:insert-invitation"></iron-icon></paper-button>
+          <paper-input class="from" value="{{mydate}} {{mytime}}" style="width:70%;"></paper-input>
+          <paper-button class="from" toggles active="{{fromDateTimeOpen}}"><iron-icon icon="editor:insert-invitation"></iron-icon></paper-button>
           <h4>To:</h4>
-          <paper-input id="to" value="{{mydate2}} {{mytime2}}"></paper-input>
-          <paper-button id="to" toggles active="{{fromDateTimeOpen2}}"><iron-icon icon="editor:insert-invitation"></iron-icon></paper-button>
+          <paper-input class="to" value="{{mydate2}} {{mytime2}}" style="width:70%;"></paper-input>
+          <paper-button class="to" toggles active="{{fromDateTimeOpen2}}"><iron-icon icon="editor:insert-invitation"></iron-icon></paper-button>
           <paper-dropdown-menu label="Refreshing every:">
             <paper-listbox class="dropdown-content" selected="0">
               <paper-item>off</paper-item>
@@ -99,39 +99,26 @@
       </div>
       <div id="quickrange">
         <h2 style="left:30px;">Quick Ranges</h2>
+
           <div id="listbox" role="listbox">
-            <paper-item id="range" fromtime="7" to="now" on-tap="computeDays">Last 7 days</paper-item>
-            <paper-item id="range" fromtime="30" to="now" on-tap="computeDays">Last 30 days</paper-item>
-            <paper-item id="range" fromtime="60" to="now" on-tap="computeDays">Last 60 days</paper-item>
-            <paper-item id="range" fromtime="90" to="now" on-tap="computeDays">Last 90 days</paper-item>
-            <paper-item id="range" fromtime="6" to="now" on-tap="computeMonths">Last 6 months</paper-item>
-            <paper-item id="range" fromtime="1" to="now" on-tap="computeYears">Last 1 year</paper-item>
-            <paper-item id="range" fromtime="2" to="now" on-tap="computeYears">Last 2 year</paper-item>
-            <paper-item id="range" fromtime="5" to="now" on-tap="computeYears">Last 5 year</paper-item>
+              <template is="dom-repeat" items="[[lastxDays]]" as="item">
+                  <paper-item id="range" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
+              </template>
           </div>
           <div id="listbox" role="listbox">
-            <paper-item id="range" fromtime="1" to="now" on-tap="computeTime">Yesterday</paper-item>
-            <paper-item id="range" fromtime="2" to="1" on-tap="computeTime">Day before yesterday</paper-item>
-            <paper-item id="range" fromtime="7" to="1" on-tap="computeTime">This day last week</paper-item>
-            <paper-item id="range" fromtime="1" to="1" on-tap="computeWeek">Previous week</paper-item>
-            <paper-item id="range" fromtime="1" to="1" on-tap="computeMonth">Previous month</paper-item>
-            <paper-item id="range" fromtime="1" to="1" on-tap="computeYear">Previous year</paper-item>
+            <template is="dom-repeat" items="[[previousxTime]]">
+                <paper-item id="range" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
+            </template>
           </div>
           <div id="listbox" role="listbox">
-            <paper-item id="range" fromtime="0" to="0" on-tap="computeTime">Today</paper-item>
-            <paper-item id="range" fromtime="0" to="0" on-tap="computeWeek">This week</paper-item>
-            <paper-item id="range" fromtime="0" to="0" on-tap="computeMonth">This month</paper-item>
-            <paper-item id="range" fromtime="0" to="0" on-tap="computeYear">This year</paper-item>
+            <template is="dom-repeat" items="[[currentxDays]]">
+                <paper-item id="range" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
+            </template>
           </div>
           <div id="listbox" role="listbox">
-            <paper-item id="range" fromtime="5" to="now" on-tap="computeMinutes">Last 5 minutes</paper-item>
-            <paper-item id="range" fromtime="15" to="now" on-tap="computeMinutes">Last 15 minutes</paper-item>
-            <paper-item id="range" fromtime="30" to="now" on-tap="computeMinutes">Last 30 minutes</paper-item>
-            <paper-item id="range" fromtime="60" to="now" on-tap="computeMinutes">Last 1 hours</paper-item>
-            <paper-item id="range" fromtime="180" to="now" on-tap="computeMinutes">Last 3 hours</paper-item>
-            <paper-item id="range" fromtime="360" to="now" on-tap="computeMinutes">Last 6 hours</paper-item>
-            <paper-item id="range" fromtime="720" to="now" on-tap="computeMinutes">Last 12 hours</paper-item>
-            <paper-item id="range" fromtime="1440" to="now" on-tap="computeMinutes">Last 24 hours</paper-item>
+            <template is="dom-repeat" items="[[lastxMinutes]]">
+                <paper-item id="range" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
+            </template>
           </div>
     </paper-dialog>
     <paper-dialog id="datetime" opened="{{fromDateTimeOpen}}">
@@ -166,6 +153,185 @@
 
         opened: Boolean,
         fromDateTimeOpen: Boolean,
+        lastxDays:{
+          type:Array,
+          value:[
+          {
+            fromtime: 7,
+            to: "now",
+            type: "days",
+            text: "Last 7 days"
+          },
+          {
+            fromtime:30,
+            to:"now",
+            type:"days",
+            text:"Last 30 days"
+          },
+          {
+            fromtime:60,
+            to:"now",
+            type:"days",
+            text:"Last 60 days"
+          },
+          {
+            fromtime:90,
+            to:"now",
+            type:"days",
+            text:"Last 90 days"
+          },
+          {
+            fromtime:6,
+            to:"now",
+            type:"months",
+            text:"Last 6 months"
+          },
+          {
+            fromtime:1,
+            to:"now",
+            type:"years",
+            text:"Last 1 year"
+          },
+          {
+            fromtime:2,
+            to:"now",
+            type:"years",
+            text:"Last 2 years"
+          },
+          {
+            fromtime:5,
+            to:"now",
+            type:"years",
+            text:"Last 5 years"
+          },
+        ]
+        },
+        previousxTime:{
+          type:Array,
+          notify: true,
+          value:[
+            {
+              fromtime:1,
+              to:"now",
+              type:"time",
+              text:"Yesterday"
+            },
+            {
+              fromtime:2,
+              to:1,
+              type:"time",
+              text:"Day before yesterday"
+            },
+            {
+              fromtime:7,
+              to:1,
+              type:"time",
+              text:"This day last week"
+            },
+            {
+              fromtime:1,
+              to:1,
+              type:"week",
+              text:"Previous week"
+            },
+            {
+              fromtime:1,
+              to:1,
+              type:"month",
+              text:"Previous month"
+            },
+            {
+              fromtime:1,
+              to:1,
+              type:"year",
+              text:"Previous year"
+            }
+          ]
+        },
+        currentxDays:{
+          type:Array,
+          notify: true,
+          value:[
+            {
+              fromtime:0,
+              to:0,
+              type:"time",
+              text:"Today"
+            },
+            {
+              fromtime:0,
+              to:0,
+              type:"week",
+              text:"This week"
+            },
+            {
+              fromtime:0,
+              to:0,
+              type:"month",
+              text:"This month"
+            },
+            {
+              fromtime:0,
+              to:0,
+              type:"year",
+              text:"This year"
+            }
+          ]
+        },
+        lastxMinutes:{
+          type:Array,
+          notify: true,
+          value:[
+            {
+              fromtime:5,
+              to:"now",
+              type:"minutes",
+              text:"Last 5 minutes"
+            },
+            {
+              fromtime:15,
+              to:"now",
+              type:"minutes",
+              text:"Last 15 minutes"
+            },
+            {
+              fromtime:30,
+              to:"now",
+              type:"minutes",
+              text:"Last 30 minutes"
+            },
+            {
+              fromtime:60,
+              to:"now",
+              type:"minutes",
+              text:"Last 1 hour"
+            },
+            {
+              fromtime:180,
+              to:"now",
+              type:"minutes",
+              text:"Last 3 hours"
+            },
+            {
+              fromtime:360,
+              to:"now",
+              type:"minutes",
+              text:"Last 6 hours"
+            },
+            {
+              fromtime:720,
+              to:"now",
+              type:"minutes",
+              text:"Last 12 hours"
+            },
+            {
+              fromtime:1440,
+              to:"now",
+              type:"minutes",
+              text:"Last 24 hours"
+            },
+          ]
+        },
         mydate: {
           type:Date,
           notify: true,
@@ -292,115 +458,49 @@
         var year = currentDate.getFullYear()
         document.write("<b>" + day + "/" + month + "/" + year + "</b>")
       },
-      computeDays: function(e){
+      computeRange: function(e){
         var el=e.srcElement;
         var fromtime=el.attributes.fromtime.value;
         var to=el.attributes.to.value;
-        if(typeof to=="string" && to=="now"){
-          to=new Date();
-        }
-        var endpoint=to.toLocaleString();
-        to.setDate(to.getDate()-fromtime);
-        var startpoint=to.toLocaleString();
-        this.mydate=startpoint;
-        this.mydate2=endpoint;
-        console.log(startpoint,endpoint);
-      },
-      computeMonths: function(e){
-        var el=e.srcElement;
-        var fromtime=el.attributes.fromtime.value;
-        var to=el.attributes.to.value;
-        if(typeof to=="string" && to=="now"){
-          to=new Date();
-        }
-        var endpoint=to.toLocaleString();
-        to.setMonth(to.getMonth()-fromtime);
-        var startpoint=to.toLocaleString();
-        this.mydate=startpoint;
-        this.mydate2=endpoint;
-        console.log(startpoint,endpoint);
-      },
-      computeYears: function(e){
-        var el=e.srcElement;
-        var fromtime=el.attributes.fromtime.value;
-        var to=el.attributes.to.value;
-        if(typeof to=="string" && to=="now"){
-          to=new Date();
-        }
-        var endpoint=to.toLocaleString();
-        to.setFullYear(to.getUTCFullYear()-fromtime);
-        var startpoint=to.toLocaleString();
-        this.mydate=startpoint;
-        this.mydate2=endpoint;
-        console.log(startpoint,endpoint);
-      },
-      computeTime: function(e){
-        var el=e.srcElement;
-        var fromtime=el.attributes.fromtime.value;
-        var to=el.attributes.to.value;
-        if(typeof to=="string" && to=="now"){
-          to=new Date();
-        }
-        var endpoint=moment().subtract(fromtime,'days').endOf('day').format('MMMM Do YYYY, h:mm:ss a');
-        var startpoint=moment().subtract(fromtime,'days').startOf('day').format('MMMM Do YYYY, h:mm:ss a');
-        this.mydate=startpoint;
-        this.mydate2=endpoint;
-        console.log(startpoint,endpoint);
-      },
-      computeWeek: function(e){
-        var el=e.srcElement;
-        var fromtime=el.attributes.fromtime.value;
-        var to=el.attributes.to.value;
-        if(typeof to=="string" && to=="now"){
-          to=new Date();
-        }
-        var endpoint=moment().subtract(fromtime, 'weeks').endOf('isoWeek').format('MMMM Do YYYY, h:mm:ss a');
-        var startpoint=moment().subtract(fromtime, 'weeks').startOf('isoWeek').format('MMMM Do YYYY, h:mm:ss a');
-        this.mydate=startpoint;
-        this.mydate2=endpoint;
-        console.log(startpoint,endpoint);
-      },
-      computeMonth: function(e){
-        var el=e.srcElement;
-        var fromtime=el.attributes.fromtime.value;
-        var to=el.attributes.to.value;
-        if(typeof to=="string" && to=="now"){
-          to=new Date();
-        }
-        var endpoint=moment().subtract(fromtime,'months').endOf('month').format('MMMM Do YYYY, h:mm:ss a');
-        var startpoint=moment().subtract(fromtime,'months').startOf('month').format('MMMM Do YYYY, h:mm:ss a');
-        this.mydate=startpoint;
-        this.mydate2=endpoint;
-        console.log(startpoint,endpoint);
-      },
-      computeYear: function(e){
-        var el=e.srcElement;
-        var fromtime=el.attributes.fromtime.value;
-        var to=el.attributes.to.value;
-        if(typeof to=="string" && to=="now"){
-          to=new Date();
-        }
-        var endpoint=moment().subtract(fromtime,'years').endOf('year').format('MMMM Do YYYY, h:mm:ss a');
-        var startpoint=moment().subtract(fromtime,'years').startOf('year').format('MMMM Do YYYY, h:mm:ss a');
-        this.mydate=startpoint;
-        this.mydate2=endpoint;
-        console.log(startpoint,endpoint);
-      },
-      computeMinutes: function(e){
-        var el=e.srcElement;
-        var fromtime=el.attributes.fromtime.value;
-        var to=el.attributes.to.value;
-        if(typeof to=="string" && to=="now"){
-          to=new Date();
-        }
-        var endpoint=to.toLocaleString();
-        to.setMinutes(to.getMinutes()-fromtime);
-        var startpoint=to.toLocaleString();
-        this.mydate=startpoint;
-        this.mydate2=endpoint;
-        console.log(startpoint,endpoint);
-      },
+        var val= el.attributes.type.value;
 
+        if(typeof to=="string" && to=="now"){
+          to=new Date();
+        }
+        switch (val){
+          case "days":var endpoint=to.toLocaleString();
+                      to.setDate(to.getDate()-fromtime);
+                      var startpoint=to.toLocaleString();
+          break;
+          case "years":var endpoint=to.toLocaleString();
+                       to.setFullYear(to.getUTCFullYear()-fromtime);
+                       var startpoint=to.toLocaleString();
+          break;
+          case "months":var endpoint=to.toLocaleString();
+                        to.setMonth(to.getMonth()-fromtime);
+                        var startpoint=to.toLocaleString();
+          break;
+          case "time":var endpoint=moment().subtract(fromtime,'days').endOf('day').format('YYYY-MM-DD, HH:mm:ss A');
+                      var startpoint=moment().subtract(fromtime,'days').startOf('day').format('YYYY-MM-DD, HH:mm:ss A');
+          break;
+          case "week":var endpoint=moment().subtract(fromtime, 'weeks').endOf('isoWeek').format('YYYY-MM-DD, HH:mm:ss A');
+                      var startpoint=moment().subtract(fromtime, 'weeks').startOf('isoWeek').format('YYYY-MM-DD, HH:mm:ss A');
+          break;
+          case "month":var endpoint=moment().subtract(fromtime,'months').endOf('month').format('YYYY-MM-DD, HH:mm:ss A');
+                       var startpoint=moment().subtract(fromtime,'months').startOf('month').format('YYYY-MM-DD, HH:mm:ss A');
+          break;
+          case "year":var endpoint=moment().subtract(fromtime,'years').endOf('year').format('YYYY-MM-DD, HH:mm:ss A');
+                      var startpoint=moment().subtract(fromtime,'years').startOf('year').format('YYYY-MM-DD, HH:mm:ss A');
+          break;
+          case "minutes":var endpoint=to.toLocaleString();
+                         to.setMinutes(to.getMinutes()-fromtime);
+                         var startpoint=to.toLocaleString();
+          break;
+        }
+        this.mydate=startpoint;
+        this.mydate2=endpoint;
+        console.log(startpoint,endpoint,val);
+      },
       attached: function() {
         // `attached` fires once the element and its parents have been inserted
         // into a document.
