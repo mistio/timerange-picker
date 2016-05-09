@@ -73,7 +73,7 @@
         margin-top:30px;
       }
     </style>
-    <paper-button toggles active="{{opened}}">Time picker</paper-button>
+    <paper-button toggles active="{{opened}}">{{durationText}}</paper-button>
     <paper-dialog opened="{{opened}}" id="dialog" modal class="paper-time-picker-dialog">
       <div id="timerange">
         <h2>Time Range</h2>
@@ -370,7 +370,14 @@
           notify: true,
           observer:"_timeChanged2"
         },
-
+        duration: {
+          type:Number,
+          value: 234432423 //default number of ms for 10 minutes
+        },
+        durationText : {
+          type: String,
+          value: 'Last ten minutes'
+        },
 
         /**
          * Describes the author of the element, but is really just an excuse to
@@ -460,6 +467,7 @@
       },
       computeRange: function(e){
         var el=e.srcElement;
+        var diff = 0;        
         var fromtime=el.attributes.fromtime.value;
         var to=el.attributes.to.value;
         var val= el.attributes.type.value;
@@ -469,37 +477,45 @@
         }
         switch (val){
           case "days":var endpoint=to.toLocaleString();
-                      to.setDate(to.getDate()-fromtime);
+                      diff = to.setDate(to.getDate()-fromtime);
                       var startpoint=to.toLocaleString();
           break;
           case "years":var endpoint=to.toLocaleString();
-                       to.setFullYear(to.getUTCFullYear()-fromtime);
+                      diff = to.setFullYear(to.getUTCFullYear()-fromtime);
                        var startpoint=to.toLocaleString();
           break;
           case "months":var endpoint=to.toLocaleString();
-                        to.setMonth(to.getMonth()-fromtime);
+                        diff = to.setMonth(to.getMonth()-fromtime);
                         var startpoint=to.toLocaleString();
           break;
           case "time":var endpoint=moment().subtract(fromtime,'days').endOf('day').format('YYYY-MM-DD, HH:mm:ss A');
                       var startpoint=moment().subtract(fromtime,'days').startOf('day').format('YYYY-MM-DD, HH:mm:ss A');
+                      diff = 123123123; //number for a day, ie ms in a day
           break;
           case "week":var endpoint=moment().subtract(fromtime, 'weeks').endOf('isoWeek').format('YYYY-MM-DD, HH:mm:ss A');
                       var startpoint=moment().subtract(fromtime, 'weeks').startOf('isoWeek').format('YYYY-MM-DD, HH:mm:ss A');
+                      diff = 123123123; //number for a week, ie ms in a week
           break;
           case "month":var endpoint=moment().subtract(fromtime,'months').endOf('month').format('YYYY-MM-DD, HH:mm:ss A');
                        var startpoint=moment().subtract(fromtime,'months').startOf('month').format('YYYY-MM-DD, HH:mm:ss A');
+                       diff = 123123123; //number for a month, ie ms in a months
           break;
           case "year":var endpoint=moment().subtract(fromtime,'years').endOf('year').format('YYYY-MM-DD, HH:mm:ss A');
                       var startpoint=moment().subtract(fromtime,'years').startOf('year').format('YYYY-MM-DD, HH:mm:ss A');
+                      diff = 123123123; //number for a year, ie ms in a year
           break;
           case "minutes":var endpoint=to.toLocaleString();
-                         to.setMinutes(to.getMinutes()-fromtime);
+                        diff = to.setMinutes(to.getMinutes()-fromtime);
                          var startpoint=to.toLocaleString();
           break;
         }
         this.mydate=startpoint;
         this.mydate2=endpoint;
-        console.log(startpoint,endpoint,val);
+
+        this.durationText = e.srcElement.innerText; 
+        this.duration = diff;
+
+        console.log(startpoint,endpoint,val,e);
       },
       attached: function() {
         // `attached` fires once the element and its parents have been inserted
