@@ -1,15 +1,15 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../../components/paper-date-picker/paper-date-picker.html">
-<link rel="import" href="../../components/paper-time-picker/paper-time-picker.html">
-<link rel="import" href="../../components/paper-button/paper-button.html">
-<link rel="import" href="../../components/paper-input/paper-input.html">
-<link rel="import" href="../../components/paper-dialog/paper-dialog.html">
-<link rel="import" href="../../components/paper-dropdown-menu/paper-dropdown-menu.html">
-<link rel="import" href="../../components/paper-listbox/paper-listbox.html">
-<link rel="import" href="../../components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../../components/paper-item/paper-item.html">
-<link rel="import" href="../../components/iron-icons/iron-icons.html">
-<link rel="import" href="../../components/iron-icons/editor-icons.html">
+<link rel="import" href="../paper-date-picker/paper-date-picker.html">
+<link rel="import" href="../paper-time-picker/paper-time-picker.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-dropdown-menu/paper-dropdown-menu.html">
+<link rel="import" href="../paper-listbox/paper-listbox.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-icons/editor-icons.html">
 
 
 <!--
@@ -73,7 +73,7 @@
         margin-top:30px;
       }
     </style>
-    <paper-button toggles active="{{opened}}">{{durationText}}</paper-button>
+    <paper-button  on-tap="minusDuration"><iron-icon icon="icons:chevron-left"></iron-icon></paper-button><paper-button toggles active="{{opened}}">{{durationText}}</paper-button><paper-button on-tap="plusDuration"><iron-icon icon="icons:chevron-right"></iron-icon></paper-button>
     <paper-dialog opened="{{opened}}" id="dialog" modal class="paper-time-picker-dialog">
       <div id="timerange">
         <h2>Time Range</h2>
@@ -370,13 +370,19 @@
           notify: true,
           observer:"_timeChanged2"
         },
-        duration: {
+        diff: {
           type:Number,
-          value: 234432423 //default number of ms for 10 minutes
+          value: 600000 //default number of ms for 10 minutes
+        },
+        endOfDiff: {
+          type: Date
+        },
+        nowOfDiff: {
+          type: Date
         },
         durationText : {
           type: String,
-          value: 'Last ten minutes'
+          value: 'Last 10 minutes'
         },
 
         /**
@@ -409,6 +415,8 @@
         this.mydate2="";
         this.mytime="";
         this.mytime2="";
+        this.endOfDiff = new Date();
+        this.nowOfDiff = new Date();
       },
       getTime:function() {
         var element = this.querySelector("#picktime");
@@ -467,7 +475,7 @@
       },
       computeRange: function(e){
         var el=e.srcElement;
-        var diff = 0;        
+        var diff = 0;
         var fromtime=el.attributes.fromtime.value;
         var to=el.attributes.to.value;
         var val= el.attributes.type.value;
@@ -479,43 +487,81 @@
           case "days":var endpoint=to.toLocaleString();
                       diff = to.setDate(to.getDate()-fromtime);
                       var startpoint=to.toLocaleString();
+                      var now = moment(endpoint); //todays date
+                      var end = moment(startpoint); // another date
+                      diff = moment.duration(now.diff(end));
           break;
           case "years":var endpoint=to.toLocaleString();
-                      diff = to.setFullYear(to.getUTCFullYear()-fromtime);
+                       diff = to.setFullYear(to.getUTCFullYear()-fromtime);
                        var startpoint=to.toLocaleString();
+                       var now = moment(endpoint); //todays date
+                       var end = moment(startpoint); // another date
+                       diff = moment.duration(now.diff(end));
           break;
           case "months":var endpoint=to.toLocaleString();
                         diff = to.setMonth(to.getMonth()-fromtime);
                         var startpoint=to.toLocaleString();
+                        var now = moment(endpoint); //todays date
+                        var end = moment(startpoint); // another date
+                        diff = moment.duration(now.diff(end));
           break;
           case "time":var endpoint=moment().subtract(fromtime,'days').endOf('day').format('YYYY-MM-DD, HH:mm:ss A');
                       var startpoint=moment().subtract(fromtime,'days').startOf('day').format('YYYY-MM-DD, HH:mm:ss A');
-                      diff = 123123123; //number for a day, ie ms in a day
+                      var now = moment(endpoint); //todays date
+                      var end = moment(startpoint); // another date
+                      var diff = moment.duration(now.diff(end));
           break;
           case "week":var endpoint=moment().subtract(fromtime, 'weeks').endOf('isoWeek').format('YYYY-MM-DD, HH:mm:ss A');
                       var startpoint=moment().subtract(fromtime, 'weeks').startOf('isoWeek').format('YYYY-MM-DD, HH:mm:ss A');
-                      diff = 123123123; //number for a week, ie ms in a week
+                      var now = moment(endpoint); //todays date
+                      var end = moment(startpoint); // another date
+                      var diff = moment.duration(now.diff(end));
           break;
           case "month":var endpoint=moment().subtract(fromtime,'months').endOf('month').format('YYYY-MM-DD, HH:mm:ss A');
                        var startpoint=moment().subtract(fromtime,'months').startOf('month').format('YYYY-MM-DD, HH:mm:ss A');
-                       diff = 123123123; //number for a month, ie ms in a months
+                       var now = moment(endpoint); //todays date
+                       var end = moment(startpoint); // another date
+                       var diff = moment.duration(now.diff(end));
           break;
           case "year":var endpoint=moment().subtract(fromtime,'years').endOf('year').format('YYYY-MM-DD, HH:mm:ss A');
                       var startpoint=moment().subtract(fromtime,'years').startOf('year').format('YYYY-MM-DD, HH:mm:ss A');
-                      diff = 123123123; //number for a year, ie ms in a year
+                      var now = moment(endpoint); //todays date
+                      var end = moment(startpoint); // another date
+                      var diff = moment.duration(now.diff(end));
           break;
           case "minutes":var endpoint=to.toLocaleString();
-                        diff = to.setMinutes(to.getMinutes()-fromtime);
+                         diff = to.setMinutes(to.getMinutes()-fromtime);
                          var startpoint=to.toLocaleString();
+                         var now = moment(endpoint); //todays date
+                         var end = moment(startpoint); // another date
+                         diff = moment.duration(now.diff(end));
           break;
         }
         this.mydate=startpoint;
         this.mydate2=endpoint;
 
-        this.durationText = e.srcElement.innerText; 
-        this.duration = diff;
+        this.durationText = e.srcElement.innerText;
+        this.endOfDiff = end;
+        this.nowOfDiff = now;
+        this.diff = diff;
 
-        console.log(startpoint,endpoint,val,e);
+        console.log(startpoint,endpoint,val,diff, now);
+      },
+      minusDuration: function(){
+          var diff = this.diff;
+          var end = new Date (this.endOfDiff - diff);
+          this.endOfDiff =  end;
+          var start = new Date (end -diff);
+          this.durationText = start.toLocaleString() + " - " + end.toLocaleString();
+          console.log(diff, end, start);
+      },
+      plusDuration: function(){
+          var diff = this.diff;
+          var now = new Date (this.nowOfDiff + diff);
+          this.nowOfDiff =  now;
+          var start = new Date (now + diff);
+          this.durationText = now.toLocaleString()+ " - " + start.toLocaleString();
+          console.log(diff, now);
       },
       attached: function() {
         // `attached` fires once the element and its parents have been inserted
