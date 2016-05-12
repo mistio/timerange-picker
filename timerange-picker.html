@@ -78,10 +78,10 @@
       <div id="timerange">
         <h2>Time Range</h2>
           <h4>From:</h4>
-          <paper-input class="from" value="{{mydate}} {{mytime}}" style="width:70%;"></paper-input>
+          <paper-input id="from" class="from" value="{{fromdate}} {{startime}}" style="width:70%;" on-tap="clearSelectedButton"></paper-input>
           <paper-button class="from" toggles active="{{fromDateTimeOpen}}"><iron-icon icon="editor:insert-invitation"></iron-icon></paper-button>
           <h4>To:</h4>
-          <paper-input class="to" value="{{mydate2}} {{mytime2}}" style="width:70%;"></paper-input>
+          <paper-input id="to" class="to" value="{{todate}} {{totime}}" style="width:70%;" on-tap="clearSelectedButton"></paper-input>
           <paper-button class="to" toggles active="{{fromDateTimeOpen2}}"><iron-icon icon="editor:insert-invitation"></iron-icon></paper-button>
           <paper-dropdown-menu label="Refreshing every:">
             <paper-listbox class="dropdown-content" selected="0">
@@ -93,7 +93,7 @@
             </paper-listbox>
           </paper-dropdown-menu>
           <div class="buttons">
-            <paper-button dialog-confirm>Apply</paper-button>
+            <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
             <paper-button dialog-dismiss>Cancel</paper-button>
           </div>
       </div>
@@ -102,22 +102,22 @@
 
           <div id="listbox" role="listbox">
               <template is="dom-repeat" items="[[lastxDays]]" as="item">
-                  <paper-item id="range" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
+                  <paper-item id="range" class="range-button" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
               </template>
           </div>
           <div id="listbox" role="listbox">
             <template is="dom-repeat" items="[[previousxTime]]">
-                <paper-item id="range" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
+                <paper-item id="range" class="range-button" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
             </template>
           </div>
           <div id="listbox" role="listbox">
             <template is="dom-repeat" items="[[currentxDays]]">
-                <paper-item id="range" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
+                <paper-item id="range" class="range-button" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
             </template>
           </div>
           <div id="listbox" role="listbox">
             <template is="dom-repeat" items="[[lastxMinutes]]">
-                <paper-item id="range" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
+                <paper-item id="range" class="range-button" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
             </template>
           </div>
     </paper-dialog>
@@ -128,7 +128,7 @@
         <paper-time-picker id="picktime" time="{{time}}"></paper-time-picker>
       </div>
       <div class="buttons">
-        <paper-button dialog-confirm>Apply</paper-button>
+        <paper-button dialog-confirm on-tap="">Apply</paper-button>
         <paper-button dialog-dismiss>Cancel</paper-button>
       </div>
     </paper-dialog>
@@ -139,7 +139,7 @@
         <paper-time-picker id="picktime" time="{{time2}}"></paper-time-picker>
       </div>
       <div class="buttons">
-        <paper-button dialog-confirm>Apply</paper-button>
+        <paper-button dialog-confirm on-tap="">Apply</paper-button>
         <paper-button dialog-dismiss>Cancel</paper-button>
       </div>
     </paper-dialog>
@@ -153,6 +153,7 @@
 
         opened: Boolean,
         fromDateTimeOpen: Boolean,
+        onApply: Boolean,
         lastxDays:{
           type:Array,
           value:[
@@ -332,13 +333,13 @@
             },
           ]
         },
-        mydate: {
+        fromdate: {
           type:Date,
           notify: true,
         },
         opened: Boolean,
         fromDateTimeOpen2: Boolean,
-        mydate2: {
+        todate: {
           type:Date,
           notify: true,
         },
@@ -352,11 +353,11 @@
           notify: true,
           observer:"_dateChanged2"
         },
-        mytime:{
+        startime:{
           type:String,
           notify: true,
         },
-        mytime2:{
+        totime:{
           type:String,
           notify: true,
         },
@@ -377,12 +378,18 @@
         endOfDiff: {
           type: Date
         },
-        nowOfDiff: {
-          type: Date
-        },
         durationText : {
           type: String,
           value: 'Last 10 minutes'
+        },
+        datetime : {
+          type: Date
+        },
+        tempStartDate : {
+          type: Date
+        },
+        tempEndDate : {
+          type: Date
         },
 
         /**
@@ -411,40 +418,39 @@
         },
       },
       ready: function(){
-        this.mydate="";
-        this.mydate2="";
-        this.mytime="";
-        this.mytime2="";
+        this.fromdate="";
+        this.todate="";
+        this.startime="";
+        this.totime="";
         this.endOfDiff = new Date();
-        this.nowOfDiff = new Date();
       },
       getTime:function() {
         var element = this.querySelector("#picktime");
         var time = element.time;
-        this.mytime = time;
+        this.startime = time;
       },
       getTime2:function() {
         var element = this.querySelector("#picktime");
         var time = element.time2;
-        this.mytime2 = time;
+        this.totime = time;
       },
       _timeChanged:function(time,old){
-        this.mytime = time;
+        this.startime = time;
         console.log('sdfsdf');
       },
       _timeChanged2:function(time,old){
-        this.mytime2 = time;
+        this.totime = time;
         console.log('sdfsdf');
       },
       getDate:function() {
         var element = this.querySelector("#pickdate");
         var date = element.date;
-        this.mydate = date;
+        this.fromdate = date;
       },
       getDate2:function() {
         var element = this.querySelector("#pickdate");
         var date = element.date2;
-        this.mydate2 = date;
+        this.todate = date;
       },
       _dateChanged:function(date,old){
         date = new Date(date || Date.now()),
@@ -453,7 +459,7 @@
         year = date.getFullYear();
         if (month.length < 2) month = '0' + month;
         if (day.length < 2) day = '0' + day;
-        this.mydate=month+"-"+ day+"-"+ year;
+        this.fromdate=day+"-"+ month+"-"+ year;
         console.log('sdfsdf');
       },
       _dateChanged2:function(date,old){
@@ -463,7 +469,7 @@
         year = date.getFullYear();
         if (month.length < 2) month = '0' + month;
         if (day.length < 2) day = '0' + day;
-        this.mydate2=month+"-"+ day+"-"+ year;
+        this.todate=day+"-"+ month+"-"+ year;
         console.log('sdfsdf');
       },
       getCurrentDate:function(){
@@ -475,6 +481,10 @@
       },
       computeRange: function(e){
         var el=e.srcElement;
+        var prevEl = this.querySelector('.range-button[selected="true"]');
+        if (prevEl)
+          prevEl.setAttribute("selected", false);
+        el.setAttribute("selected", true);
         var diff = 0;
         var fromtime=el.attributes.fromtime.value;
         var to=el.attributes.to.value;
@@ -505,29 +515,46 @@
                         var end = moment(startpoint); // another date
                         diff = moment.duration(now.diff(end));
           break;
-          case "time":var endpoint=moment().subtract(fromtime,'days').endOf('day').format('YYYY-MM-DD, HH:mm:ss A');
-                      var startpoint=moment().subtract(fromtime,'days').startOf('day').format('YYYY-MM-DD, HH:mm:ss A');
+          case "time":var endpoint=moment().subtract(fromtime,'days').endOf('day');
+                      var startpoint=moment().subtract(fromtime,'days').startOf('day');
                       var now = moment(endpoint); //todays date
                       var end = moment(startpoint); // another date
-                      var diff = moment.duration(now.diff(end));
+                      var diff = moment.duration(now.diff(end)).asMilliseconds();
+                      console.log('now: ',now);
+                      console.log('end: ',end);
+                      console.log('now.diff: ',now.diff(end));
+                      console.log('diff: ',diff);
+
           break;
-          case "week":var endpoint=moment().subtract(fromtime, 'weeks').endOf('isoWeek').format('YYYY-MM-DD, HH:mm:ss A');
-                      var startpoint=moment().subtract(fromtime, 'weeks').startOf('isoWeek').format('YYYY-MM-DD, HH:mm:ss A');
+          case "week":var endpoint=moment().subtract(fromtime, 'weeks').endOf('isoWeek');
+                      var startpoint=moment().subtract(fromtime, 'weeks').startOf('isoWeek');
                       var now = moment(endpoint); //todays date
                       var end = moment(startpoint); // another date
-                      var diff = moment.duration(now.diff(end));
+                      var diff = moment.duration(now.diff(end)).asMilliseconds();
+                      console.log('now: ',now);
+                      console.log('end: ',end);
+                      console.log('now.diff: ',now.diff(end));
+                      console.log('diff: ',diff);
           break;
-          case "month":var endpoint=moment().subtract(fromtime,'months').endOf('month').format('YYYY-MM-DD, HH:mm:ss A');
-                       var startpoint=moment().subtract(fromtime,'months').startOf('month').format('YYYY-MM-DD, HH:mm:ss A');
+          case "month":var endpoint=moment().subtract(fromtime,'months').endOf('month');
+                       var startpoint=moment().subtract(fromtime,'months').startOf('month');
                        var now = moment(endpoint); //todays date
                        var end = moment(startpoint); // another date
-                       var diff = moment.duration(now.diff(end));
+                       var diff = moment.duration(now.diff(end)).asMilliseconds();
+                       console.log('now: ',now);
+                       console.log('end: ',end);
+                       console.log('now.diff: ',now.diff(end));
+                       console.log('diff: ',diff);
           break;
-          case "year":var endpoint=moment().subtract(fromtime,'years').endOf('year').format('YYYY-MM-DD, HH:mm:ss A');
-                      var startpoint=moment().subtract(fromtime,'years').startOf('year').format('YYYY-MM-DD, HH:mm:ss A');
+          case "year":var endpoint=moment().subtract(fromtime,'years').endOf('year');
+                      var startpoint=moment().subtract(fromtime,'years').startOf('year');
                       var now = moment(endpoint); //todays date
                       var end = moment(startpoint); // another date
-                      var diff = moment.duration(now.diff(end));
+                      var diff = moment.duration(now.diff(end)).asMilliseconds();
+                      console.log('now: ',now);
+                      console.log('end: ',end);
+                      console.log('now.diff: ',now.diff(end));
+                      console.log('diff: ',diff);
           break;
           case "minutes":var endpoint=to.toLocaleString();
                          diff = to.setMinutes(to.getMinutes()-fromtime);
@@ -537,31 +564,50 @@
                          diff = moment.duration(now.diff(end));
           break;
         }
-        this.mydate=startpoint;
-        this.mydate2=endpoint;
+        this.fromdate=moment(startpoint).format('DD-MM-YYYY HH:mm:ss A');
+        this.todate=moment(endpoint).format('DD-MM-YYYY HH:mm:ss A');
+        this.tempStartDate=this.fromdate;
+        this.tempEndDate=this.todate;
 
-        this.durationText = e.srcElement.innerText;
+        //this.durationText = e.srcElement.innerText;
         this.endOfDiff = end;
-        this.nowOfDiff = now;
         this.diff = diff;
 
-        console.log(startpoint,endpoint,val,diff, now);
+        console.log(startpoint,endpoint,val,diff);
       },
       minusDuration: function(){
           var diff = this.diff;
           var end = new Date (this.endOfDiff - diff);
           this.endOfDiff =  end;
           var start = new Date (end -diff);
-          this.durationText = start.toLocaleString() + " - " + end.toLocaleString();
+          this.durationText = moment(start).format('DD-MM-YYYY HH:mm:ss A') + " - " + moment(end).format('DD-MM-YYYY HH:mm:ss A') ;
           console.log(diff, end, start);
       },
       plusDuration: function(){
           var diff = this.diff;
-          var now = new Date (this.nowOfDiff + diff);
-          this.nowOfDiff =  now;
-          var start = new Date (now + diff);
-          this.durationText = now.toLocaleString()+ " - " + start.toLocaleString();
-          console.log(diff, now);
+          var end = new Date (this.endOfDiff + diff);
+          this.endOfDiff =  end;
+          var start = new Date (end + diff);
+          this.durationText = end.toLocaleString() + " - " + start.toLocaleString();
+          console.log(diff, end, start);
+      },
+      clearSelectedButton: function(){
+        var prevEl = this.querySelector('.range-button[selected="true"]');
+        if (prevEl)
+          prevEl.setAttribute("selected", false);
+      },
+      addNewDate: function(){
+        var start = this.$.from.value;
+        var end = this.$.to.value;
+        var selEl = this.querySelector('.range-button[selected="true"]');
+        if (selEl) {
+          this.durationText = selEl.innerText;
+        }
+        else {
+          this.datetime = start +"-"+ end;
+          this.durationText = this.datetime;
+        }
+        console.log(datetime);
       },
       attached: function() {
         // `attached` fires once the element and its parents have been inserted
