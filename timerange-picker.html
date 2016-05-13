@@ -73,16 +73,16 @@
         margin-top: 30px;
       }
     </style>
-    <paper-button  on-tap="minusDuration"><iron-icon icon="icons:chevron-left"></iron-icon></paper-button><paper-button toggles active="{{opened}}">{{durationText}}</paper-button><paper-button on-tap="plusDuration"><iron-icon icon="icons:chevron-right"></iron-icon></paper-button>
-    <paper-dialog opened="{{opened}}" id="dialog" modal class="paper-time-picker-dialog">
+    <paper-button  on-tap="minusDuration"><iron-icon icon="icons:chevron-left"></iron-icon></paper-button><paper-button toggles active="{{mainDialogOpen}}">{{durationText}}</paper-button><paper-button on-tap="plusDuration"><iron-icon icon="icons:chevron-right"></iron-icon></paper-button>
+    <paper-dialog opened="{{mainDialogOpen}}" id="dialog" modal class="paper-time-picker-dialog">
       <div id="timerange">
         <h2>Time Range</h2>
           <h4>From:</h4>
-          <paper-input id="from" class="from" value="{{fromdate}} {{startime}}" style="width:70%;" on-tap="clearSelectedButton"></paper-input>
-          <paper-button class="from" toggles active="{{fromDateTimeOpen}}"><iron-icon icon="editor:insert-invitation"></iron-icon></paper-button>
+          <paper-input id="from" class="from" value="{{from}}" style="width:70%;" on-tap="clearSelectedButton"></paper-input>
+          <paper-button class="from" toggles active="{{fromDialogOpen}}"><iron-icon icon="editor:insert-invitation"></iron-icon></paper-button>
           <h4>To:</h4>
-          <paper-input id="to" class="to" value="{{todate}} {{totime}}" style="width:70%;" on-tap="clearSelectedButton"></paper-input>
-          <paper-button class="to" toggles active="{{fromDateTimeOpen2}}"><iron-icon icon="editor:insert-invitation"></iron-icon></paper-button>
+          <paper-input id="to" class="to" value="{{to}}" style="width:70%;" on-tap="clearSelectedButton"></paper-input>
+          <paper-button class="to" toggles active="{{toDialogOpen}}"><iron-icon icon="editor:insert-invitation"></iron-icon></paper-button>
           <div class="buttons">
             <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
             <paper-button dialog-dismiss>Cancel</paper-button>
@@ -112,25 +112,25 @@
             </template>
           </div>
     </paper-dialog>
-    <paper-dialog id="datetime" opened="{{fromDateTimeOpen}}">
-      <h2>Select datetime</h2>
+    <paper-dialog id="datetime" opened="{{fromDialogOpen}}">
+      <h2>Select from datetime</h2>
       <div>
-        <paper-date-picker id="pickdate" class="date-button" date="{{date}}" on-tap="combineDateAndTime"></paper-date-picker>
-        <paper-time-picker id="picktime"  class="time-button" time="{{time}}" on-tap="combineDateAndTime"></paper-time-picker>
+        <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
+        <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
       </div>
       <div class="buttons">
-        <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
+        <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
         <paper-button dialog-dismiss>Cancel</paper-button>
       </div>
     </paper-dialog>
-    <paper-dialog id="datetime" opened="{{fromDateTimeOpen2}}">
-      <h2>Select datetime</h2>
+    <paper-dialog id="datetime" opened="{{toDialogOpen}}">
+      <h2>Select to datetime</h2>
       <div>
-        <paper-date-picker id="pickdate2" class="date-button" date="{{date2}}" on-tap="computeRange"></paper-date-picker>
-        <paper-time-picker id="picktime2" class="time-button" time="{{time2}}" on-tap="computeRange"></paper-time-picker>
+        <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
+        <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
       </div>
       <div class="buttons">
-        <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
+        <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
         <paper-button dialog-dismiss>Cancel</paper-button>
       </div>
     </paper-dialog>
@@ -141,13 +141,52 @@
       is: 'timerange-picker',
 
       properties: {
-
-        opened: Boolean,
-        fromDateTimeOpen: Boolean,
+        mainDialogOpen: Boolean,
+        fromDialogOpen: Boolean,
+        toDialogOpen: Boolean,
         onApply: Boolean,
-        lastxDays: {
-          type: Array,
-          value: [
+        lastxDays: Array,
+        previousxTime: Array,
+        currentxDays: Array,
+        lastxMinutes: Array,
+        diff: {
+          type: Number,
+          value: 600000 //default number of ms for 10 minutes
+        },
+        endOfDiff: {
+          type: Date
+        },
+        from: String,
+        to: String,
+        durationText : {
+          type: String,
+          computed: '_computeDurationText(from, to)'
+        }
+      },
+
+      applyTo: function() {
+        var dateTo = this.querySelector('#pickDateTo'),
+            timeTo = this.querySelector('#pickTimeTo');
+        console.warn(dateTo, timeTo);
+        console.warn(moment(dateTo.date).add(timeTo.hour, 'hours').add(timeTo.minute, 'minutes').toLocaleString());
+        this.to = moment(dateTo.date).add(timeTo.hour, 'hours').add(timeTo.minute, 'minutes').toLocaleString();
+      },
+
+      applyFrom: function() {
+        var dateFrom = this.querySelector('#pickDateFrom'),
+            timeFrom = this.querySelector('#pickTimeFrom');
+        console.warn(dateFrom, timeFrom);
+        console.warn(moment(dateFrom.date).add(timeFrom.hour, 'hours').add(timeFrom.minute, 'minutes').toLocaleString());
+        this.from = moment(dateFrom.date).add(timeFrom.hour, 'hours').add(timeFrom.minute, 'minutes').toLocaleString();
+      },
+
+      ready: function(){
+        this.fromdate = "";
+        this.todate = "";
+        this.startime = "";
+        this.totime = "";
+        this.endOfDiff = new Date();
+        this.lastxDays = [
           {
             fromtime: 7,
             to: "now",
@@ -161,236 +200,98 @@
             text: "Last 30 days"
           },
           {
-            fromtime: 60,
-            to: "now",
-            type: "days",
-            text: "Last 60 days"
-          },
-          {
-            fromtime: 90,
-            to: "now",
-            type: "days",
-            text: "Last 90 days"
-          },
-          {
-            fromtime: 6,
-            to: "now",
-            type: "months",
-            text: "Last 6 months"
-          },
-          {
             fromtime: 1,
             to: "now",
             type: "years",
-            text: "Last 1 year"
-          },
-          {
-            fromtime: 2,
-            to: "now",
-            type: "years",
-            text: "Last 2 years"
-          },
+            text: "Last year"
+          }
+        ];
+        this.lastxMinutes = [
           {
             fromtime: 5,
             to: "now",
-            type: "years",
-            text: "Last 5 years"
+            type: "minutes",
+            text: "Last 5 minutes"
           },
-        ]
-        },
-        previousxTime: {
-          type: Array,
-          notify: true,
-          value: [
-            {
-              fromtime: 1,
-              to: "now",
-              type: "time",
-              text: "Yesterday"
-            },
-            {
-              fromtime: 2,
-              to: 1,
-              type: "time",
-              text: "Day before yesterday"
-            },
-            {
-              fromtime: 7,
-              to: 1,
-              type: "time",
-              text: "This day last week"
-            },
-            {
-              fromtime: 1,
-              to: 1,
-              type: "week",
-              text: "Previous week"
-            },
-            {
-              fromtime: 1,
-              to: 1,
-              type: "month",
-              text: "Previous month"
-            },
-            {
-              fromtime: 1,
-              to: 1,
-              type: "year",
-              text: "Previous year"
-            }
-          ]
-        },
-        currentxDays: {
-          type: Array,
-          notify: true,
-          value: [
-            {
-              fromtime: 0,
-              to: 0,
-              type: "time",
-              text: "Today"
-            },
-            {
-              fromtime: 0,
-              to: 0,
-              type: "week",
-              text: "This week"
-            },
-            {
-              fromtime: 0,
-              to: 0,
-              type: "month",
-              text: "This month"
-            },
-            {
-              fromtime: 0,
-              to: 0,
-              type: "year",
-              text: "This year"
-            }
-          ]
-        },
-        lastxMinutes: {
-          type: Array,
-          notify: true,
-          value: [
-            {
-              fromtime: 5,
-              to: "now",
-              type: "minutes",
-              text: "Last 5 minutes"
-            },
-            {
-              fromtime: 15,
-              to: "now",
-              type: "minutes",
-              text: "Last 15 minutes"
-            },
-            {
-              fromtime: 30,
-              to: "now",
-              type: "minutes",
-              text: "Last 30 minutes"
-            },
-            {
-              fromtime: 60,
-              to: "now",
-              type: "minutes",
-              text: "Last 1 hour"
-            },
-            {
-              fromtime: 180,
-              to: "now",
-              type: "minutes",
-              text: "Last 3 hours"
-            },
-            {
-              fromtime: 360,
-              to: "now",
-              type: "minutes",
-              text: "Last 6 hours"
-            },
-            {
-              fromtime: 720,
-              to: "now",
-              type: "minutes",
-              text: "Last 12 hours"
-            },
-            {
-              fromtime: 1440,
-              to: "now",
-              type: "minutes",
-              text: "Last 24 hours"
-            },
-          ]
-        },
-        fromdate: {
-          type: Date,
-          notify: true,
-        },
-        opened: Boolean,
-        fromDateTimeOpen2: Boolean,
-        todate: {
-          type: Date,
-          notify: true,
-        },
-        date: {
-          type: Date,
-          notify: true,
-          observer: "_dateChanged"
-        },
-        date2: {
-          type: Date,
-          notify: true,
-          observer: "_dateChanged2"
-        },
-        startime: {
-          type: String,
-          notify: true,
-        },
-        totime: {
-          type: String,
-          notify: true,
-        },
-        time: {
-          type: String,
-          notify: true,
-          observer: "_timeChanged"
-        },
-        time2: {
-          type: String,
-          notify: true,
-          observer: "_timeChanged2"
-        },
-        diff: {
-          type: Number,
-          value: 600000 //default number of ms for 10 minutes
-        },
-        endOfDiff: {
-          type: Date
-        },
-        durationText : {
-          type: String,
-          value: 'Last 10 minutes'
-        },
-        datetime : {
-          type: Date
-        },
-        tempStartDate : {
-          type: Date
-        },
-        tempEndDate : {
-          type: Date
-        },
+          {
+            fromtime: 30,
+            to: "now",
+            type: "minutes",
+            text: "Last 30 minutes"
+          },
+          {
+            fromtime: 60,
+            to: "now",
+            type: "minutes",
+            text: "Last 1 hour"
+          },
+          {
+            fromtime: 180,
+            to: "now",
+            type: "minutes",
+            text: "Last 3 hours"
+          }
+        ];
+        this.previousxTime = [
+          {
+            fromtime: 1,
+            to: "now",
+            type: "time",
+            text: "Yesterday"
+          },
+          {
+            fromtime: 7,
+            to: 1,
+            type: "time",
+            text: "This day last week"
+          },
+          {
+            fromtime: 1,
+            to: 1,
+            type: "week",
+            text: "Previous week"
+          },
+          {
+            fromtime: 1,
+            to: 1,
+            type: "month",
+            text: "Previous month"
+          },
+          {
+            fromtime: 1,
+            to: 1,
+            type: "year",
+            text: "Previous year"
+          }
+        ];
+        this.currentxDays = [
+          {
+            fromtime: 0,
+            to: 0,
+            type: "time",
+            text: "Today"
+          },
+          {
+            fromtime: 0,
+            to: 0,
+            type: "week",
+            text: "This week"
+          },
+          {
+            fromtime: 0,
+            to: 0,
+            type: "month",
+            text: "This month"
+          },
+          {
+            fromtime: 0,
+            to: 0,
+            type: "year",
+            text: "This year"
+          }
+        ];
       },
 
-      ready: function(){
-        this.fromdate = "";
-        this.todate = "";
-        this.startime = "";
-        this.totime = "";
-        this.endOfDiff = new Date();
-      },
       getDate: function() {
         var elDate = this.querySelector("#pickdate");
         var date = elDate.date;
@@ -398,7 +299,9 @@
         var time = elTime.time;
         this.fromdate = date;
         this.startime = time;
+        this.fromdate = moment(date + ' ' + time, "YYYY-MM-DD HH:mm:ss A");
       },
+
       getDate2: function() {
         var elDate = this.querySelector("#pickdate");
         var date = elDate.date2;
@@ -406,7 +309,14 @@
         var time = elTime.time2;
         this.todate = date;
         this.totime = time;
+        this.todate = moment(date + ' ' + time, "YYYY-MM-DD HH:mm:ss A");
       },
+
+      _computeDurationText(from, to) {
+            // FIXME: implement
+            return "Last 10 minutes";
+      },
+
       _dateChanged: function(date,old){
         date = new Date(date || Date.now()),
         month = '' + (date.getMonth() + 1),
@@ -416,6 +326,7 @@
         if (day.length < 2) day = '0' + day;
         this.fromdate=day + "-" + month + "-" + year;
       },
+
       _dateChanged2: function(date,old){
         date = new Date(date || Date.now()),
         month = '' + (date.getMonth() + 1),
@@ -425,31 +336,15 @@
         if (day.length < 2) day = '0' + day;
         this.todate=day + "-" + month + "-" + year;
       },
+
       _timeChanged: function(time,old){
         this.startime = time;
       },
+
       _timeChanged2: function(time,old){
         this.totime = time;
       },
-      combineDateAndTime: function(date, time) {
-        var datetime = new Date(date +' '+ time);
-        // format the output
-        var month = datetime.getMonth() + 1;
-        var day = datetime.getDate();
-        var year = datetime.getFullYear();
-        var hour = this.getHours();
-        if (hour < 10)
-            hour = "0"+hour;
-        var min = this.getMinutes();
-        if (min < 10)
-            min = "0"+min;
-        var sec = this.getSeconds();
-        if (sec < 10)
-            sec = "0"+sec;
-        // put it all togeter
-        var dateTimeString = month + '/' + day + '/' + year + ' ' + hour + ':' + min + ':' + sec;
-        console.log(dateTimeString);
-      },
+
       getCurrentDate: function(){
         var currentDate = new Date()
         var day = currentDate.getDate()
@@ -457,6 +352,7 @@
         var year = currentDate.getFullYear()
         document.write("<b>" + day + "/" + month + "/" + year + "</b>")
       },
+
       computeRange: function(e){
         var el = e.srcElement;
         var prevEl = this.querySelector('.range-button[selected="true"]');
@@ -532,7 +428,7 @@
         this.endOfDiff = end;
         this.diff = diff;
 
-        console.log(startpoint,endpoint,val,diff,pickdate);
+        console.log();
       },
       minusDuration: function(){
           var diff = this.diff;
