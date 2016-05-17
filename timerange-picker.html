@@ -92,24 +92,9 @@
         <h2 style="left:30px;">Quick Ranges</h2>
 
           <div id="listbox" role="listbox">
-              <template is="dom-repeat" items="[[lastxDays]]" as="item">
-                  <paper-item id="range" class="range-button" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
+              <template is="dom-repeat" items="[[lastxDate]]" as="item">
+                  <paper-item id="range" class$="range-button" from$="[[item.from]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeDuration">[[item.text]]</paper-item>
               </template>
-          </div>
-          <div id="listbox" role="listbox">
-            <template is="dom-repeat" items="[[previousxTime]]">
-                <paper-item id="range" class="range-button" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
-            </template>
-          </div>
-          <div id="listbox" role="listbox">
-            <template is="dom-repeat" items="[[currentxDays]]">
-                <paper-item id="range" class="range-button" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
-            </template>
-          </div>
-          <div id="listbox" role="listbox">
-            <template is="dom-repeat" items="[[lastxMinutes]]">
-                <paper-item id="range" class="range-button" fromtime$="[[item.fromtime]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeRange">[[item.text]]</paper-item>
-            </template>
           </div>
     </paper-dialog>
     <paper-dialog id="datetime" opened="{{fromDialogOpen}}">
@@ -145,10 +130,7 @@
         fromDialogOpen: Boolean,
         toDialogOpen: Boolean,
         onApply: Boolean,
-        lastxDays: Array,
-        previousxTime: Array,
-        currentxDays: Array,
-        lastxMinutes: Array,
+        lastxDate: Array,
         diff: {
           type: Number,
           value: 600000 //default number of ms for 10 minutes
@@ -160,275 +142,151 @@
         to: String,
         durationText : {
           type: String,
-          computed: '_computeDurationText(from, to)'
+          value: 'Last 10 minutes'
         }
       },
 
-      applyTo: function() {
-        var dateTo = this.querySelector('#pickDateTo'),
-            timeTo = this.querySelector('#pickTimeTo');
-        console.warn(dateTo, timeTo);
-        console.warn(moment(dateTo.date).add(timeTo.hour, 'hours').add(timeTo.minute, 'minutes').toLocaleString());
-        this.to = moment(dateTo.date).add(timeTo.hour, 'hours').add(timeTo.minute, 'minutes').toLocaleString();
-      },
-
-      applyFrom: function() {
-        var dateFrom = this.querySelector('#pickDateFrom'),
-            timeFrom = this.querySelector('#pickTimeFrom');
-        console.warn(dateFrom, timeFrom);
-        console.warn(moment(dateFrom.date).add(timeFrom.hour, 'hours').add(timeFrom.minute, 'minutes').toLocaleString());
-        this.from = moment(dateFrom.date).add(timeFrom.hour, 'hours').add(timeFrom.minute, 'minutes').toLocaleString();
-      },
-
       ready: function(){
-        this.fromdate = "";
-        this.todate = "";
-        this.startime = "";
-        this.totime = "";
         this.endOfDiff = new Date();
-        this.lastxDays = [
+        this.lastxDate = [
           {
-            fromtime: 7,
+            from: 7,
             to: "now",
             type: "days",
             text: "Last 7 days"
           },
           {
-            fromtime: 30,
+            from: 30,
             to: "now",
             type: "days",
             text: "Last 30 days"
           },
           {
-            fromtime: 1,
+            from: 1,
             to: "now",
-            type: "years",
+            type: "year",
             text: "Last year"
-          }
-        ];
-        this.lastxMinutes = [
+          },
           {
-            fromtime: 5,
+            from: 5,
             to: "now",
             type: "minutes",
             text: "Last 5 minutes"
           },
           {
-            fromtime: 30,
+            from: 30,
             to: "now",
             type: "minutes",
             text: "Last 30 minutes"
           },
           {
-            fromtime: 60,
+            from: 60,
             to: "now",
             type: "minutes",
             text: "Last 1 hour"
           },
           {
-            fromtime: 180,
+            from: 3,
             to: "now",
-            type: "minutes",
+            type: "hours",
             text: "Last 3 hours"
-          }
-        ];
-        this.previousxTime = [
-          {
-            fromtime: 1,
-            to: "now",
-            type: "time",
-            text: "Yesterday"
           },
-          {
-            fromtime: 7,
-            to: 1,
-            type: "time",
-            text: "This day last week"
-          },
-          {
-            fromtime: 1,
-            to: 1,
-            type: "week",
-            text: "Previous week"
-          },
-          {
-            fromtime: 1,
-            to: 1,
-            type: "month",
-            text: "Previous month"
-          },
-          {
-            fromtime: 1,
-            to: 1,
-            type: "year",
-            text: "Previous year"
-          }
-        ];
-        this.currentxDays = [
-          {
-            fromtime: 0,
-            to: 0,
-            type: "time",
-            text: "Today"
-          },
-          {
-            fromtime: 0,
-            to: 0,
-            type: "week",
-            text: "This week"
-          },
-          {
-            fromtime: 0,
-            to: 0,
-            type: "month",
-            text: "This month"
-          },
-          {
-            fromtime: 0,
-            to: 0,
-            type: "year",
-            text: "This year"
-          }
         ];
       },
 
-      getDate: function() {
-        var elDate = this.querySelector("#pickdate");
-        var date = elDate.date;
-        var elTime = this.querySelector("#picktime");
-        var time = elTime.time;
-        this.fromdate = date;
-        this.startime = time;
-        this.fromdate = moment(date + ' ' + time, "YYYY-MM-DD HH:mm:ss A");
+      applyFrom: function() {
+        var dateFrom = this.querySelector('#pickDateFrom'),
+            timeFrom = this.querySelector('#pickTimeFrom');
+        this.from = moment(dateFrom.date).add(timeFrom.hour, 'hours').add(timeFrom.minute, 'minutes').format('DD-MM-YYYY HH:mm:ss A');
       },
 
-      getDate2: function() {
-        var elDate = this.querySelector("#pickdate");
-        var date = elDate.date2;
-        var elTime = this.querySelector("#picktime");
-        var time = elTime.time2;
-        this.todate = date;
-        this.totime = time;
-        this.todate = moment(date + ' ' + time, "YYYY-MM-DD HH:mm:ss A");
+      applyTo: function() {
+        var dateTo = this.querySelector('#pickDateTo'),
+            timeTo = this.querySelector('#pickTimeTo');
+        this.to = moment(dateTo.date).add(timeTo.hour, 'hours').add(timeTo.minute, 'minutes').format('DD-MM-YYYY HH:mm:ss A');
       },
 
-      _computeDurationText(from, to) {
-            // FIXME: implement
-            return "Last 10 minutes";
-      },
-
-      _dateChanged: function(date,old){
-        date = new Date(date || Date.now()),
-        month = '' + (date.getMonth() + 1),
-        day = '' + date.getDate(),
-        year = date.getFullYear();
-        if (month.length < 2) month = '0' + month;
-        if (day.length < 2) day = '0' + day;
-        this.fromdate=day + "-" + month + "-" + year;
-      },
-
-      _dateChanged2: function(date,old){
-        date = new Date(date || Date.now()),
-        month = '' + (date.getMonth() + 1),
-        day = '' + date.getDate(),
-        year = date.getFullYear();
-        if (month.length < 2) month = '0' + month;
-        if (day.length < 2) day = '0' + day;
-        this.todate=day + "-" + month + "-" + year;
-      },
-
-      _timeChanged: function(time,old){
-        this.startime = time;
-      },
-
-      _timeChanged2: function(time,old){
-        this.totime = time;
-      },
-
-      getCurrentDate: function(){
-        var currentDate = new Date()
-        var day = currentDate.getDate()
-        var month = currentDate.getMonth() + 1
-        var year = currentDate.getFullYear()
-        document.write("<b>" + day + "/" + month + "/" + year + "</b>")
-      },
-
-      computeRange: function(e){
+      computeDuration: function(e){
         var el = e.srcElement;
+        var diff = 0;
         var prevEl = this.querySelector('.range-button[selected="true"]');
         if (prevEl)
-          prevEl.setAttribute("selected", false);
+        prevEl.setAttribute("selected", false);
         el.setAttribute("selected", true);
-        var diff = 0;
-        var fromtime = el.attributes.fromtime.value;
+        var from = el.attributes.from.value;
         var to = el.attributes.to.value;
         var val = el.attributes.type.value;
 
         if(typeof to == "string" && to == "now"){
-          to = new Date();
+            var current = new Date();
         }
         switch (val){
-          case "days": var endpoint = to.toLocaleString();
-                       diff = to.setDate(to.getDate() - fromtime);
-                       var startpoint = to.toLocaleString();
-                       var now = moment(endpoint); //todays date
-                       var end = moment(startpoint); // another date
-                       diff = moment.duration(now.diff(end));
+          case "days":
+                       var endpoint = to;
+                       var startpoint = from + " " + "days ago";
+                       var end = current.toLocaleString();
+                       diff = current.setDate(current.getDate() - from);
+                       var start = current.toLocaleString();
+                       var now = moment(end); //todays date
+                       var ago = moment(start); // another date
+                       diff = moment.duration(now.diff(ago));
           break;
-          case "years": var endpoint = to.toLocaleString();
-                        diff = to.setFullYear(to.getUTCFullYear() - fromtime);
-                        var startpoint = to.toLocaleString();
-                        var now = moment(endpoint); //todays date
-                        var end = moment(startpoint); // another date
-                        diff = moment.duration(now.diff(end));
+          case "years":
+                        var endpoint = to;
+                        var startpoint  = from + " " + "years ago";
+                        var end = current.toLocaleString();
+                        diff = current.setFullYear(current.getUTCFullYear() - from);
+                        var start = current.toLocaleString();
+                        var now = moment(end); //todays date
+                        var ago = moment(start); // another date
+                        diff = moment.duration(now.diff(ago));
           break;
-          case "months": var endpoint = to.toLocaleString();
-                         diff = to.setMonth(to.getMonth() - fromtime);
-                         var startpoint = to.toLocaleString();
-                         var now = moment(endpoint); //todays date
-                         var end = moment(startpoint); // another date
-                         diff = moment.duration(now.diff(end));
+          case "months":
+                         var endpoint = to;
+                         var startpoint = from + " " + "months ago";
+                         var end = current.toLocaleString();
+                         diff = current.setMonth(current.getMonth() - from);
+                         var start = current.toLocaleString();
+                         var now = moment(end); //todays date
+                         var ago = moment(start); // another date
+                         diff = moment.duration(now.diff(ago));
           break;
-          case "time": var endpoint = moment().subtract(fromtime,'days').endOf('day');
-                       var startpoint = moment().subtract(fromtime,'days').startOf('day');
-                       var now = moment(endpoint); //todays date
-                       var end = moment(startpoint); // another date
-                       var diff = moment.duration(now.diff(end)).asMilliseconds();
+          case "hours": var endpoint = to;
+                         var startpoint = from + " " + "hours ago";
+                         var end = current.toLocaleString();
+                         diff = current.setHours(current.getHours() - from);
+                         var start = current.toLocaleString();
+                         var now = moment(end); //todays date
+                         var ago = moment(start); // another date
+                         diff = moment.duration(now.diff(ago));
+                         console.warn(ago, now, diff);
           break;
-          case "week": var endpoint = moment().subtract(fromtime, 'weeks').endOf('isoWeek');
-                       var startpoint = moment().subtract(fromtime, 'weeks').startOf('isoWeek');
-                       var now = moment(endpoint); //todays date
-                       var end = moment(startpoint); // another date
-                       var diff = moment.duration(now.diff(end)).asMilliseconds();
+          case "year":
+                       var endpoint = to;
+                       var startpoint = from + " " + "year ago";
+                       var end = moment().subtract(from,'years').endOf('year');
+                       var start = moment().subtract(from,'years').startOf('year');
+                       var now = moment(end); //todays date
+                       var ago = moment(start); // another date
+                       var diff = moment.duration(now.diff(ago)).asMilliseconds();
           break;
-          case "month": var endpoint = moment().subtract(fromtime,'months').endOf('month');
-                        var startpoint = moment().subtract(fromtime,'months').startOf('month');
-                        var now = moment(endpoint); //todays date
-                        var end = moment(startpoint); // another date
-                        var diff = moment.duration(now.diff(end)).asMilliseconds();
-          break;
-          case "year": var endpoint = moment().subtract(fromtime,'years').endOf('year');
-                       var startpoint = moment().subtract(fromtime,'years').startOf('year');
-                       var now = moment(endpoint); //todays date
-                       var end = moment(startpoint); // another date
-                       var diff = moment.duration(now.diff(end)).asMilliseconds();
-          break;
-          case "minutes": var endpoint = to.toLocaleString();
-                          diff = to.setMinutes(to.getMinutes() - fromtime);
-                          var startpoint = to.toLocaleString();
-                          var now = moment(endpoint); //todays date
-                          var end = moment(startpoint); // another date
-                          diff = moment.duration(now.diff(end));
+          case "minutes":
+                          var endpoint = to;
+                          var startpoint = from + " " + "minutes ago";
+                          var end = current.toLocaleString();
+                          diff = current.setMinutes(current.getMinutes() - from);
+                          var start = current.toLocaleString();
+                          var now = moment(end); //todays date
+                          var ago = moment(start); // another date
+                          diff = moment.duration(now.diff(ago));
           break;
         }
-        this.fromdate = moment(startpoint).format('DD-MM-YYYY HH:mm:ss A');
-        this.todate = moment(endpoint).format('DD-MM-YYYY HH:mm:ss A');
-        this.tempStartDate = this.fromdate;
-        this.tempEndDate = this.todate;
-        this.endOfDiff = end;
+        this.from = startpoint;
+        this.to = endpoint;
+        this.endOfDiff = now;
         this.diff = diff;
-
-        console.log();
+        var test = new Date();
+        console.warn(current, test, from, to);
       },
       minusDuration: function(){
           var diff = this.diff;
@@ -454,10 +312,10 @@
       addNewDate: function(){
         var start = this.$.from.value;
         var end = this.$.to.value;
-        var date = this.$.pickdate.value;
-        var time = this.$.picktime.value;
-        var date2 = this.$.pickdate2.value;
-        var time2 = this.$.picktime2.value;
+        var date = this.$.pickDateFrom.value;
+        var time = this.$.pickTimeFrom.value;
+        var date2 = this.$.pickDateTo.value;
+        var time2 = this.$.pickTimeTo.value;
         var selPickD = this.querySelector('.date-button[selected="true"]');
         var selPickT = this.querySelector('.time-button[selected="true"]');
         var selEl = this.querySelector('.range-button[selected="true"]');
