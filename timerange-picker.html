@@ -69,8 +69,16 @@
         display: inline-block;
       }
       .buttons{
+        right:20%;
         float: left;
         margin-top: 30px;
+      }
+      .pick-buttons{
+        float: left;
+        margin-top: 30px;
+      }
+      paper-button {
+        text-transform: none;
       }
     </style>
     <paper-button  on-tap="minusDuration"><iron-icon icon="icons:chevron-left"></iron-icon></paper-button><paper-button toggles active="{{mainDialogOpen}}">{{durationText}}</paper-button><paper-button on-tap="plusDuration"><iron-icon icon="icons:chevron-right"></iron-icon></paper-button>
@@ -83,10 +91,7 @@
           <h4>To:</h4>
           <paper-input id="to" class="to" value="{{to}}" style="width:70%;" on-tap="clearSelectedButton"></paper-input>
           <paper-button class="to" toggles active="{{toDialogOpen}}"><iron-icon icon="editor:insert-invitation"></iron-icon></paper-button>
-          <div class="buttons">
-            <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
-            <paper-button dialog-dismiss>Cancel</paper-button>
-          </div>
+
       </div>
       <div id="quickrange">
         <h2 style="left:30px;">Quick Ranges</h2>
@@ -95,6 +100,10 @@
               <template is="dom-repeat" items="[[lastxDate]]" as="item">
                   <paper-item id="range" class$="range-button" from$="[[item.from]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeDuration">[[item.text]]</paper-item>
               </template>
+              <div class="buttons">
+                <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
+                <paper-button dialog-dismiss>Cancel</paper-button>
+              </div>
           </div>
     </paper-dialog>
     <paper-dialog id="datetime" opened="{{fromDialogOpen}}">
@@ -103,7 +112,7 @@
         <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
         <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
       </div>
-      <div class="buttons">
+      <div class="pick-buttons">
         <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
         <paper-button dialog-dismiss>Cancel</paper-button>
       </div>
@@ -114,7 +123,7 @@
         <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
         <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
       </div>
-      <div class="buttons">
+      <div class="pick-buttons">
         <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
         <paper-button dialog-dismiss>Cancel</paper-button>
       </div>
@@ -301,8 +310,8 @@
           this.endOfDiff =  end;
           var start = new Date(end);
           start.setMilliseconds(start.getMilliseconds() + diff);
-          this.durationText = end.toLocaleString() + " - " + start.toLocaleString();
-          console.log(end, start, diff);
+          // this.durationText = end.toLocaleString() + " - " + start.toLocaleString();
+          this.durationText = moment(end).format('DD-MM-YYYY HH:mm:ss A') + " - " + moment(start).format('DD-MM-YYYY HH:mm:ss A') ;
       },
       clearSelectedButton: function(){
         var prevEl = this.querySelector('.range-button[selected="true"]');
