@@ -81,7 +81,9 @@
         text-transform: none;
       }
     </style>
-    <paper-button  on-tap="minusDuration"><iron-icon icon="icons:chevron-left"></iron-icon></paper-button><paper-button toggles active="{{mainDialogOpen}}">{{durationText}}</paper-button><paper-button on-tap="plusDuration"><iron-icon icon="icons:chevron-right"></iron-icon></paper-button>
+    <paper-button  on-tap="minusDuration"><iron-icon icon="icons:chevron-left"></iron-icon></paper-button>
+    <paper-button toggles active="{{mainDialogOpen}}">{{durationText}}</paper-button>
+    <paper-button on-tap="plusDuration"><iron-icon icon="icons:chevron-right"></iron-icon></paper-button>
     <paper-dialog opened="{{mainDialogOpen}}" id="dialog" modal class="paper-time-picker-dialog">
       <div id="timerange">
         <h2>Time Range</h2>
@@ -239,6 +241,7 @@
                        var now = moment(end); //todays date
                        var ago = moment(start); // another date
                        diff = moment.duration(now.diff(ago));
+                       
           break;
           case "years":
                         var endpoint = to;
@@ -303,6 +306,8 @@
           this.endOfDiff =  end;
           var start = new Date (end - diff);
           this.durationText = moment(start).format('DD-MM-YYYY HH:mm:ss A') + " - " + moment(end).format('DD-MM-YYYY HH:mm:ss A') ;
+
+          this.fire('timechanged', {from: start, to: this.endOfDiff});
       },
       plusDuration: function(){
           var diff = this.diff;
@@ -312,6 +317,8 @@
           start.setMilliseconds(start.getMilliseconds() + diff);
           // this.durationText = end.toLocaleString() + " - " + start.toLocaleString();
           this.durationText = moment(end).format('DD-MM-YYYY HH:mm:ss A') + " - " + moment(start).format('DD-MM-YYYY HH:mm:ss A') ;
+
+          this.fire('timechanged', {from: start, to: this.endOfDiff});
       },
       clearSelectedButton: function(){
         var prevEl = this.querySelector('.range-button[selected="true"]');
@@ -342,6 +349,8 @@
           this.durationText = this.datetime;
         }
         console.log(datetime);
+
+        this.fire('timechanged', {from: this.from, to: this.to});
       },
       attached: function() {
         // `attached` fires once the element and its parents have been inserted
