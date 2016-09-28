@@ -19,7 +19,7 @@
 -->
 
 <dom-module id="timerange-picker">
-  <template>
+    <template>
     <style>
       :host {
         display: flex;
@@ -102,310 +102,249 @@
               <template is="dom-repeat" items="[[lastxDate]]" as="item">
                   <paper-item id="range" class$="range-button" from$="[[item.from]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeDuration">[[item.text]]</paper-item>
               </template>
-              <div class="buttons">
-                <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
-                <paper-button dialog-dismiss>Cancel</paper-button>
-              </div>
-          </div>
+    <div class="buttons">
+        <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
+        <paper-button dialog-dismiss>Cancel</paper-button>
+    </div>
+    </div>
     </paper-dialog>
     <paper-dialog id="datetime" opened="{{fromDialogOpen}}">
-      <h2>Select from datetime</h2>
-      <div>
-        <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
-        <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
-      </div>
-      <div class="pick-buttons">
-        <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
-        <paper-button dialog-dismiss>Cancel</paper-button>
-      </div>
+        <h2>Select from datetime</h2>
+        <div>
+            <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
+            <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
+        </div>
+        <div class="pick-buttons">
+            <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
+            <paper-button dialog-dismiss>Cancel</paper-button>
+        </div>
     </paper-dialog>
     <paper-dialog id="datetime" opened="{{toDialogOpen}}">
-      <h2>Select to datetime</h2>
-      <div>
-        <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
-        <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
-      </div>
-      <div class="pick-buttons">
-        <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
-        <paper-button dialog-dismiss>Cancel</paper-button>
-      </div>
+        <h2>Select to datetime</h2>
+        <div>
+            <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
+            <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
+        </div>
+        <div class="pick-buttons">
+            <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
+            <paper-button dialog-dismiss>Cancel</paper-button>
+        </div>
     </paper-dialog>
-  </template>
+    </template>
 
-  <script>
-    Polymer({
-      is: 'timerange-picker',
+    <script>
+        Polymer({
+            is: 'timerange-picker',
 
-      properties: {
-        mainDialogOpen: Boolean,
-        fromDialogOpen: Boolean,
-        toDialogOpen: Boolean,
-        onApply: Boolean,
-        lastxDate: Array,
-        diff: {
-          type: Number,
-          value: 600000 //default number of ms for 10 minutes
-        },
-        endOfDiff: {
-          type: Date
-        },
-        innerFrom:{
-          type:String,
-        },
-        innerTo:{
-          type:String,
-        },
-        from: {
-          type:String,
-          notify:true
-        },
-        to: {
-          type:String,
-          notify:true
-        },
-        durationText : {
-          type: String,
-          value: 'Last 10 minutes'
-        }
-      },
+            properties: {
+                mainDialogOpen: Boolean,
+                fromDialogOpen: Boolean,
+                toDialogOpen: Boolean,
+                onApply: Boolean,
+                lastxDate: Array,
+                diff: {
+                    type: Number,
+                    value: 600000 //default number of ms for 10 minutes
+                },
+                endOfDiff: {
+                    type: Date
+                },
+                innerFrom: {
+                    type: String,
+                },
+                innerTo: {
+                    type: String,
+                },
+                from: {
+                    type: String,
+                    notify: true
+                },
+                to: {
+                    type: String,
+                    notify: true
+                },
+                durationText: {
+                    type: String,
+                    value: 'Last 10 minutes'
+                }
+            },
 
-      ready: function(){
-        this.endOfDiff = new Date();
-        this.lastxDate = [
-          {
-            from: 7,
-            to: "now",
-            type: "days",
-            text: "Last 7 days"
-          },
-          {
-            from: 30,
-            to: "now",
-            type: "days",
-            text: "Last 30 days"
-          },
-          {
-            from: 1,
-            to: "now",
-            type: "year",
-            text: "Last year"
-          },
-          {
-            from: 5,
-            to: "now",
-            type: "minutes",
-            text: "Last 5 minutes"
-          },
-          {
-            from: 30,
-            to: "now",
-            type: "minutes",
-            text: "Last 30 minutes"
-          },
-          {
-            from: 60,
-            to: "now",
-            type: "minutes",
-            text: "Last 1 hour"
-          },
-          {
-            from: 3,
-            to: "now",
-            type: "hours",
-            text: "Last 3 hours"
-          },
-        ];
-      },
+            ready: function() {
+                this.endOfDiff = new Date();
+                this.lastxDate = [{
+                    from: 7,
+                    to: "now",
+                    type: "days",
+                    text: "Last 7 days"
+                }, {
+                    from: 30,
+                    to: "now",
+                    type: "days",
+                    text: "Last 30 days"
+                }, {
+                    from: 1,
+                    to: "now",
+                    type: "year",
+                    text: "Last year"
+                }, {
+                    from: 5,
+                    to: "now",
+                    type: "minutes",
+                    text: "Last 5 minutes"
+                }, {
+                    from: 30,
+                    to: "now",
+                    type: "minutes",
+                    text: "Last 30 minutes"
+                }, {
+                    from: 60,
+                    to: "now",
+                    type: "minutes",
+                    text: "Last 1 hour"
+                }, {
+                    from: 3,
+                    to: "now",
+                    type: "hours",
+                    text: "Last 3 hours"
+                }, ];
+            },
 
 
-      applyFrom: function() {
-        var dateFrom = this.querySelector('#pickDateFrom'),
-            timeFrom = this.querySelector('#pickTimeFrom');
-        this.innerFrom = moment(dateFrom.date).format('MM/DD/YYYY');
-        this.innerFrom+=" "+timeFrom.hour+":"+timeFrom.minute+":00";
-        console.log(new Date(this.innerFrom).getTime()/1000);
-      },
+            applyFrom: function() {
+                var dateFrom = this.querySelector('#pickDateFrom'),
+                    timeFrom = this.querySelector('#pickTimeFrom');
+                this.innerFrom = moment(dateFrom.date).format('MM/DD/YYYY');
+                this.innerFrom += " " + timeFrom.hour + ":" + timeFrom.minute + ":00";
+                console.log(new Date(this.innerFrom).getTime() / 1000);
+            },
 
-      applyTo: function() {
-        var dateTo = this.querySelector('#pickDateTo'),
-            timeTo = this.querySelector('#pickTimeTo');
-        this.innerTo = moment(dateTo.date).format('MM/DD/YYYY');//_A
-        this.innerTo+=" "+timeTo.hour+":"+timeTo.minute+":00";
-        console.log(new Date(this.innerTo).getTime()/1000);
-      },
+            applyTo: function() {
+                var dateTo = this.querySelector('#pickDateTo'),
+                    timeTo = this.querySelector('#pickTimeTo');
+                this.innerTo = moment(dateTo.date).format('MM/DD/YYYY'); //_A
+                this.innerTo += " " + timeTo.hour + ":" + timeTo.minute + ":00";
+                console.log(new Date(this.innerTo).getTime() / 1000);
+            },
 
-      computeDuration: function(e){
-        var el = e.srcElement;
-        var diff = 0;
-        var prevEl = this.querySelector('.range-button[selected="true"]');
-        if (prevEl)
-        prevEl.setAttribute("selected", false);
-        el.setAttribute("selected", true);
-        var from = el.attributes.from.value;
-        var to = el.attributes.to.value;
-        var val = el.attributes.type.value;
+            computeDuration: function(e) {
+                var el = e.srcElement;
+                var diff = 0;
+                var prevEl = this.querySelector('.range-button[selected="true"]');
+                if (prevEl)
+                    prevEl.setAttribute("selected", false);
+                el.setAttribute("selected", true);
+                var from = el.attributes.from.value;
+                var to = el.attributes.to.value;
+                var val = el.attributes.type.value;
 
-        if(typeof to == "string" && to == "now"){
-            var current = new Date();
-        }
-        switch (val){
-          case "days":
-                      this.innerFrom="-"+from+"d";
-                       /*var endpoint = to;
-                       var startpoint = from + " " + "days ago";
-                       console.log(startpoint);
-                       var end = current.toLocaleString();
-                       diff = current.setDate(current.getDate() - from);
-                       var start = current.toLocaleString();
-                       var now = moment(end); //todays date
-                       var ago = moment(start); // another date
-                       diff = moment.duration(now.diff(ago));*/
+                if (typeof to == "string" && to == "now") {
+                    var current = new Date();
+                }
+                switch (val) {
+                    case "days":
+                        this.innerFrom = "-" + from + "d";
+                        break;
+                    case "years":
+                        this.innerFrom = "-" + from + "y";
+                        break;
+                    case "months":
+                        this.innerFrom = "-" + from + "mon";
+                        break;
+                    case "hours":
+                        this.innerFrom = "-" + from + "h";
+                        break;
+                    case "year":
+                        this.innerFrom = "-" + from + "y";
+                        break;
+                    case "minutes":
+                        this.innerFrom = "-" + from + "min";
+                        break;
+                }
+                this.innerTo = "now";
+            },
+            minusDuration: function() {
+                var diff = this.diff;
+                var end = new Date(this.endOfDiff - diff);
+                this.endOfDiff = end;
+                var start = new Date(end - diff);
+                this.durationText = moment(start).format('MM/DD/YYYY HH:mm:ss') + " - " + moment(end).format('MM/DD/YYYY HH:mm:ss'); //_A
 
-          break;
-          case "years":
-                        this.innerFrom="-"+from+"y";
-                        /*var endpoint = to;
-                        var startpoint  = from + " " + "years ago";
-                        var end = current.toLocaleString();
-                        diff = current.setFullYear(current.getUTCFullYear() - from);
-                        var start = current.toLocaleString();
-                        var now = moment(end); //todays date
-                        var ago = moment(start); // another date
-                        diff = moment.duration(now.diff(ago));*/
-          break;
-          case "months":
-                        this.innerFrom="-"+from+"mon";
-                         /*var endpoint = to;
-                         var startpoint = from + " " + "months ago";
-                         var end = current.toLocaleString();
-                         diff = current.setMonth(current.getMonth() - from);
-                         var start = current.toLocaleString();
-                         var now = moment(end); //todays date
-                         var ago = moment(start); // another date
-                         diff = moment.duration(now.diff(ago));*/
-          break;
-          case "hours":
-                        this.innerFrom="-"+from+"h";
-                         /*var endpoint = to;
-                         var startpoint = from + " " + "hours ago";
-                         var end = current.toLocaleString();
-                         diff = current.setHours(current.getHours() - from);
-                         var start = current.toLocaleString();
-                         var now = moment(end); //todays date
-                         var ago = moment(start); // another date
-                         diff = moment.duration(now.diff(ago));
-                         console.warn(ago, now, diff);*/
-          break;
-          case "year":
-                      this.innerFrom="-"+from+"y";
-                       /*var endpoint = to;
-                       var startpoint = from + " " + "year ago";
-                       var end = moment().subtract(from,'years').endOf('year');
-                       var start = moment().subtract(from,'years').startOf('year');
-                       var now = moment(end); //todays date
-                       var ago = moment(start); // another date
-                       var diff = moment.duration(now.diff(ago)).asMilliseconds();*/
-          break;
-          case "minutes":
-                          this.innerFrom="-"+from+"min";
-                          /*var endpoint = to;
-                          var startpoint = from + " " + "minutes ago";
-                          var end = current.toLocaleString();
-                          diff = current.setMinutes(current.getMinutes() - from);
-                          var start = current.toLocaleString();
-                          var now = moment(end); //todays date
-                          var ago = moment(start); // another date
-                          diff = moment.duration(now.diff(ago));*/
-          break;
-        }
-        this.innerTo="now";
-        //this.from = startpoint;
-        //this.innerTo =//endpoint;
-        //this.endOfDiff = now;
-        //this.diff = diff;
-        //var test = new Date();
-        //console.warn(current, test, from, to);
-      },
-      minusDuration: function(){
-          var diff = this.diff;
-          var end = new Date (this.endOfDiff - diff);
-          this.endOfDiff =  end;
-          var start = new Date (end - diff);
-          this.durationText = moment(start).format('MM/DD/YYYY HH:mm:ss') + " - " + moment(end).format('MM/DD/YYYY HH:mm:ss') ; //_A
+                this.fire('timechanged', {
+                    from: start,
+                    to: this.endOfDiff
+                });
+            },
+            plusDuration: function() {
+                var diff = this.diff;
+                var end = new Date(this.endOfDiff + diff);
+                this.endOfDiff = end;
+                var start = new Date(end);
+                start.setMilliseconds(start.getMilliseconds() + diff);
+                this.durationText = moment(end).format('MM/DD/YYYY HH:mm:ss') + " - " + moment(start).format('MM/DD/YYYY HH:mm:ss'); // _A
 
-          this.fire('timechanged', {from: start, to: this.endOfDiff});
-      },
-      plusDuration: function(){
-          var diff = this.diff;
-          var end = new Date (this.endOfDiff + diff);
-          this.endOfDiff =  end;
-          var start = new Date(end);
-          start.setMilliseconds(start.getMilliseconds() + diff);
-          // this.durationText = end.toLocaleString() + " - " + start.toLocaleString();
-          this.durationText = moment(end).format('MM/DD/YYYY HH:mm:ss') + " - " + moment(start).format('MM/DD/YYYY HH:mm:ss') ; // _A
+                this.fire('timechanged', {
+                    from: start,
+                    to: this.endOfDiff
+                });
+            },
+            clearSelectedButton: function() {
+                var prevEl = this.querySelector('.range-button[selected="true"]');
+                if (prevEl)
+                    prevEl.setAttribute("selected", false);
+            },
+            addNewDate: function() {
+                var start = this.$.from.value;
+                var end = this.$.to.value;
+                var date = this.$.pickDateFrom.value;
+                var time = this.$.pickTimeFrom.value;
+                var date2 = this.$.pickDateTo.value;
+                var time2 = this.$.pickTimeTo.value;
+                var selPickD = this.querySelector('.date-button[selected="true"]');
+                var selPickT = this.querySelector('.time-button[selected="true"]');
+                var selEl = this.querySelector('.range-button[selected="true"]');
+                if (selEl) {
+                    this.durationText = selEl.innerText;
+                } else if (selPickD) {
+                    this.durationText = selPickD.innerText;
+                } else if (selPickT) {
+                    this.durationText = selPickT.innerText;
+                } else {
+                    this.datetime = start + "-" + end;
+                    this.durationText = this.datetime;
+                }
+                if (this.innerTo != "now") {
+                    var df = new Date(this.innerFrom);
+                    var dt = new Date(this.innerTo);
+                    // subtract the timezone offset (-3) so it can be +3 as it is supposed to be
+                    //df.setHours(df.getHours()-new Date().getTimezoneOffset()/60);
+                    //dt.setHours(dt.getHours()-new Date().getTimezoneOffset()/60);
+                    this.from = df.getTime() / 1000;
+                    this.to = dt.getTime() / 1000;
+                } else {
+                    this.from = this.innerFrom;
+                    this.to = this.innerTo;
+                }
+                console.log(this.from, this.to);
+                this.fire('timechanged', {
+                    from: this.from,
+                    to: this.to
+                });
+            },
+            attached: function() {
+                // `attached` fires once the element and its parents have been inserted
+                // into a document.
+                //
+                // This is a good place to perform any work related to your element's
+                // visual state or active behavior (measuring sizes, beginning animations,
+                // loading resources, etc).
+            },
 
-          this.fire('timechanged', {from: start, to: this.endOfDiff});
-      },
-      clearSelectedButton: function(){
-        var prevEl = this.querySelector('.range-button[selected="true"]');
-        if (prevEl)
-          prevEl.setAttribute("selected", false);
-      },
-      addNewDate: function(){
-        var start = this.$.from.value;
-        var end = this.$.to.value;
-        var date = this.$.pickDateFrom.value;
-        var time = this.$.pickTimeFrom.value;
-        var date2 = this.$.pickDateTo.value;
-        var time2 = this.$.pickTimeTo.value;
-        var selPickD = this.querySelector('.date-button[selected="true"]');
-        var selPickT = this.querySelector('.time-button[selected="true"]');
-        var selEl = this.querySelector('.range-button[selected="true"]');
-        if (selEl) {
-          this.durationText = selEl.innerText;
-        }
-        else if(selPickD){
-          this.durationText = selPickD.innerText;
-        }
-        else if(selPickT){
-          this.durationText = selPickT.innerText;
-        }
-        else{
-          this.datetime = start + "-" + end;
-          this.durationText = this.datetime;
-        }
-        if(this.innerTo!="now"){
-          var df=new Date(this.innerFrom);
-          var dt=new Date(this.innerTo);
-          // subtract the timezone offset (-3) so it can be +3 as it is supposed to be
-          //df.setHours(df.getHours()-new Date().getTimezoneOffset()/60);
-          //dt.setHours(dt.getHours()-new Date().getTimezoneOffset()/60);
-          this.from=df.getTime()/1000;
-          this.to=dt.getTime()/1000;
-        }
-        else{
-            this.from=this.innerFrom;
-            this.to=this.innerTo;
-        }
-        console.log(this.from,this.to);
-        this.fire('timechanged', {from: this.from, to: this.to});
-      },
-      attached: function() {
-        // `attached` fires once the element and its parents have been inserted
-        // into a document.
-        //
-        // This is a good place to perform any work related to your element's
-        // visual state or active behavior (measuring sizes, beginning animations,
-        // loading resources, etc).
-      },
-
-      detached: function() {
-        // The analog to `attached`, `detached` fires when the element has been
-        // removed from a document.
-        //
-        // Use this to clean up anything you did in `attached`.
-      },
-    });
-
-  </script>
+            detached: function() {
+                // The analog to `attached`, `detached` fires when the element has been
+                // removed from a document.
+                //
+                // Use this to clean up anything you did in `attached`.
+            },
+        });
+    </script>
 </dom-module>
