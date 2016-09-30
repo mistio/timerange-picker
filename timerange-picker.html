@@ -165,7 +165,7 @@
                 },
                 durationText: {
                     type: String,
-                    value: 'Last 10 minutes'
+                    value: 'Pick date and time range'
                 }
             },
 
@@ -214,15 +214,15 @@
                 var dateFrom = this.querySelector('#pickDateFrom'),
                     timeFrom = this.querySelector('#pickTimeFrom');
                 this.innerFrom = moment(dateFrom.date).format('MM/DD/YYYY');
-                this.innerFrom += " " + timeFrom.hour + ":" + timeFrom.minute + ":00";
+                this.innerFrom += " " + timeFrom.hour + ":" + timeFrom.minute;
                 console.log(new Date(this.innerFrom).getTime() / 1000);
             },
 
             applyTo: function() {
                 var dateTo = this.querySelector('#pickDateTo'),
                     timeTo = this.querySelector('#pickTimeTo');
-                this.innerTo = moment(dateTo.date).format('MM/DD/YYYY'); //_A
-                this.innerTo += " " + timeTo.hour + ":" + timeTo.minute + ":00";
+                this.innerTo = moment(dateTo.date).format('MM/DD/YYYY');
+                this.innerTo += " " + timeTo.hour + ":" + timeTo.minute;
                 console.log(new Date(this.innerTo).getTime() / 1000);
             },
 
@@ -236,10 +236,6 @@
                 var from = el.attributes.from.value;
                 var to = el.attributes.to.value;
                 var val = el.attributes.type.value;
-
-                if (typeof to == "string" && to == "now") {
-                    var current = new Date();
-                }
                 switch (val) {
                     case "days":
                         this.innerFrom = "-" + from + "d";
@@ -267,12 +263,9 @@
                 var end = new Date(this.endOfDiff - diff);
                 this.endOfDiff = end;
                 var start = new Date(end - diff);
-                this.durationText = moment(start).format('MM/DD/YYYY HH:mm:ss') + " - " + moment(end).format('MM/DD/YYYY HH:mm:ss'); //_A
-
-                this.fire('timechanged', {
-                    from: start,
-                    to: this.endOfDiff
-                });
+                this.durationText = moment(start).format('MM/DD/YYYY HH:mm') + " - " + moment(end).format('MM/DD/YYYY HH:mm');
+                this.from = Math.floor(start.getTime() / 1000);
+                this.to = Math.floor(this.endOfDiff.getTime() / 1000);
             },
             plusDuration: function() {
                 var diff = this.diff;
@@ -280,12 +273,9 @@
                 this.endOfDiff = end;
                 var start = new Date(end);
                 start.setMilliseconds(start.getMilliseconds() + diff);
-                this.durationText = moment(end).format('MM/DD/YYYY HH:mm:ss') + " - " + moment(start).format('MM/DD/YYYY HH:mm:ss'); // _A
-
-                this.fire('timechanged', {
-                    from: start,
-                    to: this.endOfDiff
-                });
+                this.durationText = moment(end).format('MM/DD/YYYY HH:mm') + " - " + moment(start).format('MM/DD/YYYY HH:mm');
+                this.from = Math.floor(start.getTime() / 1000);
+                this.to = Math.floor(this.endOfDiff.getTime() / 1000);
             },
             clearSelectedButton: function() {
                 var prevEl = this.querySelector('.range-button[selected="true"]');
@@ -324,11 +314,6 @@
                     this.from = this.innerFrom;
                     this.to = this.innerTo;
                 }
-                console.log(this.from, this.to);
-                this.fire('timechanged', {
-                    from: this.from,
-                    to: this.to
-                });
             },
             attached: function() {
                 // `attached` fires once the element and its parents have been inserted
