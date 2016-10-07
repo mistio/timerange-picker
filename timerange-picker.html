@@ -209,21 +209,18 @@
                 }, ];
             },
 
-
             applyFrom: function() {
                 var dateFrom = this.querySelector('#pickDateFrom'),
                     timeFrom = this.querySelector('#pickTimeFrom');
                 this.innerFrom = moment(dateFrom.date).format('MM/DD/YYYY');
-                this.innerFrom += " " + timeFrom.hour + ":" + timeFrom.minute;
-                console.log(new Date(this.innerFrom).getTime() / 1000);
+                this.innerFrom+= " "+moment(timeFrom.time.toString(),"hh:mm A").format('HH:mm');
             },
 
             applyTo: function() {
                 var dateTo = this.querySelector('#pickDateTo'),
                     timeTo = this.querySelector('#pickTimeTo');
                 this.innerTo = moment(dateTo.date).format('MM/DD/YYYY');
-                this.innerTo += " " + timeTo.hour + ":" + timeTo.minute;
-                console.log(new Date(this.innerTo).getTime() / 1000);
+                this.innerTo+= " "+moment(timeTo.time.toString(), "hh:mm A").format('HH:mm');
             },
 
             computeDuration: function(e) {
@@ -236,27 +233,35 @@
                 var from = el.attributes.from.value;
                 var to = el.attributes.to.value;
                 var val = el.attributes.type.value;
+                var newDate=new Date();
                 switch (val) {
                     case "days":
-                        this.innerFrom = "-" + from + "d";
+                        var pastDays =  newDate.setDate(newDate.getDate()-from);
+                        this.innerFrom = moment(new Date(pastDays)).format('MM/DD/YYYY HH:mm');
                         break;
                     case "years":
-                        this.innerFrom = "-" + from + "y";
+                        var pastDays =  newDate.setYear(newDate.getYear()-from);
+                        this.innerFrom = moment(new Date(pastDays)).format('MM/DD/YYYY HH:mm');
                         break;
                     case "months":
-                        this.innerFrom = "-" + from + "mon";
+                        var pastDays =  newDate.setMonth(newDate.getMonth()-from);
+                        this.innerFrom = moment(new Date(pastDays)).format('MM/DD/YYYY HH:mm');
                         break;
                     case "hours":
-                        this.innerFrom = "-" + from + "h";
+                        var pastDays =  newDate.setHours(newDate.getHours() - from);
+                        this.innerFrom = moment(new Date(pastDays)).format('MM/DD/YYYY HH:mm');
                         break;
                     case "year":
-                        this.innerFrom = "-" + from + "y";
+                        var pastDays =  newDate.setFullYear(newDate.getFullYear()-1);
+                        this.innerFrom = moment(new Date(pastDays)).format('MM/DD/YYYY HH:mm');
                         break;
                     case "minutes":
-                        this.innerFrom = "-" + from + "min";
+                        var pastDays =  newDate.setMinutes(newDate.getMinutes() - from);
+                        this.innerFrom = moment(new Date(pastDays)).format('MM/DD/YYYY HH:mm');
                         break;
                 }
-                this.innerTo = "now";
+                this.innerTo = moment(new Date()).format('MM/DD/YYYY HH:mm');
+
             },
             minusDuration: function() {
                 var diff = this.diff;
@@ -305,15 +310,17 @@
                 if (this.innerTo != "now") {
                     var df = new Date(this.innerFrom);
                     var dt = new Date(this.innerTo);
+                    console.log(this.innerFrom,this.innerTo);
                     // subtract the timezone offset (-3) so it can be +3 as it is supposed to be
                     //df.setHours(df.getHours()-new Date().getTimezoneOffset()/60);
                     //dt.setHours(dt.getHours()-new Date().getTimezoneOffset()/60);
                     this.from = df.getTime() / 1000;
                     this.to = dt.getTime() / 1000;
-                } else {
-                    this.from = this.innerFrom;
-                    this.to = this.innerTo;
                 }
+                // else {
+                //     this.from = this.innerFrom;
+                //     this.to = this.innerTo;
+                // }
             },
             attached: function() {
                 // `attached` fires once the element and its parents have been inserted
