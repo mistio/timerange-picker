@@ -151,11 +151,11 @@
                 },
                 innerFrom: {
                     type: String,
-                    value:'-10min'
+                    value: '-10min'
                 },
                 innerTo: {
                     type: String,
-                    value:'now'
+                    value: 'now'
                 },
                 from: {
                     type: String,
@@ -171,12 +171,6 @@
                 },
                 autoRefresh: {
                     type: Boolean,
-                    observer: '_refreshOn'
-                }
-            },
-            _refreshOn: function() {
-                if (this.dasrefresh) {
-                    //this.innerTo='now';
                 }
             },
 
@@ -271,15 +265,15 @@
             },
             minusDuration: function() {
                 var diff;
-                var from=this.from;
-                var to=this.to;
-                if (this.innerTo == "now" || this.to=="now") {
+                var from = this.from;
+                var to = this.to;
+                if (this.innerTo == "now" || this.to == "now") {
                     diff = this.diff;
-                    to = Math.floor(new Date().getTime()/1000);
-                    from = to - this.diff/1000;
+                    to = Math.floor(new Date().getTime() / 1000);
+                    from = to - this.diff / 1000;
                 } else {
                     diff = this.to * 1000 - this.from * 1000;
-                    this.diff=diff;
+                    this.diff = diff;
                 }
                 this.querySelector('#plusButton').removeAttribute("disabled");
                 var start = new Date((from * 1000) - diff);
@@ -287,22 +281,21 @@
                 this.durationText = moment(start).format('MM/DD/YYYY HH:mm') + " - " + moment(end).format('MM/DD/YYYY HH:mm');
                 this.innerTo = moment(end).format('MM/DD/YYYY HH:mm');
                 this.innerFrom = moment(start).format('MM/DD/YYYY HH:mm');
-                this.to=Math.floor(end.getTime() / 1000);
-                this.from=Math.floor(start.getTime() / 1000);
+                this.to = Math.floor(end.getTime() / 1000);
+                this.from = Math.floor(start.getTime() / 1000);
             },
             plusDuration: function() {
                 var diff = this.to * 1000 - this.from * 1000;
                 var start = new Date((this.from * 1000 + diff));
                 var end = new Date((this.to * 1000 + diff));
                 this.durationText = moment(start).format('MM/DD/YYYY HH:mm') + " - " + moment(end).format('MM/DD/YYYY HH:mm');
-                console.log(new Date((this.from * 1000 + diff * 3)), new Date, " EQUALS ", new Date((this.from * 1000 + diff * 3)) >= new Date());
                 if (new Date((this.from * 1000 + diff * 3)) >= new Date()) {
                     this.querySelector('#plusButton').setAttribute("disabled", "true");
                 }
                 this.innerTo = moment(end).format('MM/DD/YYYY HH:mm');
                 this.innerFrom = moment(start).format('MM/DD/YYYY HH:mm');
-                this.to=Math.floor(end.getTime() / 1000);
-                this.from=Math.floor(start.getTime() / 1000);
+                this.to = Math.floor(end.getTime() / 1000);
+                this.from = Math.floor(start.getTime() / 1000);
             },
             clearSelectedButton: function() {
                 var prevEl = this.querySelector('.range-button[selected="true"]');
@@ -334,12 +327,12 @@
                     var dt = new Date(this.innerTo);
                     // we use this because we update the graph when ONLY "from" changes value not "To". if we trigger the change with "From" AND "To" there would be double requests etc.
                     //so in case we change only "To" nothing would have happened
-                    var fromTrigger=0;
-                    if(this.from == new Date(this.innerFrom).getTime()/1000){
-                      fromTrigger=1;
+                    var fromTrigger = 0;
+                    if (this.from == new Date(this.innerFrom).getTime() / 1000) {
+                        fromTrigger = 1;
                     }
                     this.to = dt.getTime() / 1000;
-                    this.from = (df.getTime() / 1000)+fromTrigger;
+                    this.from = (df.getTime() / 1000) + fromTrigger;
                 } else {
                     this.to = this.innerTo;
                     this.from = this.innerFrom;
