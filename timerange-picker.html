@@ -291,10 +291,12 @@
                 this.durationText = moment(start).format('MM/DD/YYYY HH:mm') + " - " + moment(end).format('MM/DD/YYYY HH:mm');
                 if (new Date((this.from * 1000 + diff * 3)) >= new Date()) {
                     this.querySelector('#plusButton').setAttribute("disabled", "true");
+                    this.to = "now"
+                } else {
+                    this.to = Math.floor(end.getTime() / 1000);
                 }
                 this.innerTo = moment(end).format('MM/DD/YYYY HH:mm');
                 this.innerFrom = moment(start).format('MM/DD/YYYY HH:mm');
-                this.to = Math.floor(end.getTime() / 1000);
                 this.from = Math.floor(start.getTime() / 1000);
             },
             clearSelectedButton: function() {
