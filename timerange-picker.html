@@ -2,6 +2,7 @@
 <link rel="import" href="../paper-date-picker/paper-date-picker.html">
 <link rel="import" href="../paper-time-picker/paper-time-picker.html">
 <link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../paper-input/paper-input.html">
 <link rel="import" href="../paper-card/paper-card.html">
 <link rel="import" href="../paper-dialog/paper-dialog.html">
@@ -24,6 +25,7 @@
       :host {
         display: flex;
         box-sizing: border-box;
+        align-items: center;
       }
 
       .author img {
@@ -81,10 +83,16 @@
       paper-button {
         text-transform: none;
       }
+      paper-icon-button {
+        padding: 0.7em 0.57em;
+      }
+      paper-icon-button[disabled] {
+        opacity: 0.32;
+      }
     </style>
-    <paper-button  on-tap="minusDuration"><iron-icon icon="icons:chevron-left"></iron-icon></paper-button>
+    <paper-icon-button on-tap="minusDuration" icon="icons:chevron-left"></paper-icon-button>
     <paper-button toggles active="{{mainDialogOpen}}">{{durationText}}</paper-button>
-    <paper-button id="plusButton" disabled="true" on-tap="plusDuration"><iron-icon icon="icons:chevron-right"></iron-icon></paper-button>
+    <paper-icon-button id="plusButton" disabled="true" on-tap="plusDuration" icon="icons:chevron-right"></paper-icon-button>
     <paper-dialog opened="{{mainDialogOpen}}" id="dialog" modal class="paper-time-picker-dialog">
       <div id="timerange">
         <h2>Time Range</h2>
