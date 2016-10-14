@@ -1,6 +1,8 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../paper-date-picker/paper-date-picker.html">
 <link rel="import" href="../paper-time-picker/paper-time-picker.html">
+<link rel="import" href="../paper-styles/paper-styles.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../paper-input/paper-input.html">
@@ -27,60 +29,7 @@
         box-sizing: border-box;
         align-items: center;
       }
-
-      .author img {
-        display: block;
-        float: left;
-        margin-right: 5px;
-        max-height: 100px;
-        max-width: 100px;
-      }
-      #timerange{
-        display: inline-block;
-        width: 300px;
-        float: left;
-        border-right: 1px;
-            border-right-width: 1px;
-            padding: 0 20 0 20px;
-            padding-top: 0px;
-            padding-right: 20px;
-            padding-bottom: 0px;
-            padding-left: 20px;
-      }
-      #quickrange{
-        padding: 0 20px 0 30px;
-            padding-top: 0px;
-            padding-right: 20px;
-            padding-bottom: 0px;
-            padding-left: 30px;
-        min-height: 258px;
-        float: left;
-      }
-      #listbox{
-        padding: 0 20px 0 30px;
-            padding-top: 0px;
-            padding-right: 20px;
-            padding-bottom: 0px;
-            padding-left: 30px;
-        min-height: 258px;
-        float: left;
-      }
-      .from{
-        display: inline-block;
-      }
-      .to{
-        display: inline-block;
-      }
-      .buttons{
-        right:20%;
-        float: left;
-        margin-top: 30px;
-      }
-      .pick-buttons{
-        float: left;
-        margin-top: 30px;
-      }
-      paper-button {
+      paper-button#currenttimerange {
         text-transform: none;
       }
       paper-icon-button {
@@ -89,32 +38,66 @@
       paper-icon-button[disabled] {
         opacity: 0.32;
       }
+      .time-input paper-icon-button {
+        align-self: flex-end;
+      }
+      .time-input {
+        vertical-align: baseline; 
+      }
+      .buttons {
+        justify-content: flex-end;
+      }
+      #timerange {
+        margin-right: 16px;
+      }
+      #quickrange {
+        margin: 0 16px 32px 16px;
+      }
+      paper-dialog h3 {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+      hr {
+        margin: 0;
+      }
+      paper-item {
+        padding: 4px;
+        font-size: 14px;
+        min-height: auto;
+        cursor: pointer;
+      }
     </style>
     <paper-icon-button on-tap="minusDuration" icon="icons:chevron-left"></paper-icon-button>
-    <paper-button toggles active="{{mainDialogOpen}}">{{durationText}}</paper-button>
+    <paper-button id="currenttimerange" toggles active="{{mainDialogOpen}}">{{durationText}}</paper-button>
     <paper-icon-button id="plusButton" disabled="true" on-tap="plusDuration" icon="icons:chevron-right"></paper-icon-button>
-    <paper-dialog opened="{{mainDialogOpen}}" id="dialog" modal class="paper-time-picker-dialog">
-      <div id="timerange">
-        <h2>Time Range</h2>
-          <h4>From:</h4>
-          <paper-input id="from" class="from" value="{{innerFrom}}" style="width:70%;" on-tap="clearSelectedButton"></paper-input>
-          <paper-button class="from" toggles active="{{fromDialogOpen}}"><iron-icon icon="editor:insert-invitation"></iron-icon></paper-button>
-          <h4>To:</h4>
-          <paper-input id="to" class="to" value="{{innerTo}}" style="width:70%;" on-tap="clearSelectedButton"></paper-input>
-          <paper-button class="to" toggles active="{{toDialogOpen}}"><iron-icon icon="editor:insert-invitation"></iron-icon></paper-button>
-      </div>
-      <div id="quickrange">
-        <h2 style="left:30px;">Quick Ranges</h2>
 
-          <div id="listbox" role="listbox">
-              <template is="dom-repeat" items="[[lastxDate]]" as="item">
-                  <paper-item id="range" class$="range-button" from$="[[item.from]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeDuration">[[item.text]]</paper-item>
-              </template>
-    <div class="buttons">
-        <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
-        <paper-button dialog-dismiss>Cancel</paper-button>
-    </div>
-    </div>
+    <paper-dialog opened="{{mainDialogOpen}}" id="dialog" modal class="paper-time-picker-dialog">
+        <div class="layout horizontal">
+          <div id="timerange">
+              <h3>Time Range</h3>
+              <div class="layout horizontal time-input">
+                  <paper-input class="flex" id="from" label="From" value="{{innerFrom}}" on-tap="clearSelectedButton"></paper-input>
+                  <paper-icon-button class="from" toggles active="{{fromDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
+              </div>
+              <div class="layout horizontal time-input">
+                  <paper-input class="flex" id="to" label="To" value="{{innerTo}}" on-tap="clearSelectedButton"></paper-input>
+                  <paper-icon-button class="to" toggles active="{{toDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
+              </div>
+          </div>
+          <div id="quickrange">
+              <h3>Quick Ranges</h3>
+              <div id="listbox" role="listbox">
+                  <template is="dom-repeat" items="[[lastxDate]]" as="item">
+                      <paper-item id="range" class$="range-button" from$="[[item.from]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeDuration">[[item.text]]</paper-item>
+                  </template>
+                </div>
+            </div>
+        </div>
+        <hr/>
+        <div class="layout horizontal buttons">
+            <paper-button dialog-dismiss>Cancel</paper-button>
+            <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
+        </div>
     </paper-dialog>
     <paper-dialog id="datetime" opened="{{fromDialogOpen}}">
         <h2>Select from datetime</h2>
@@ -185,21 +168,6 @@
             ready: function() {
                 this.endOfDiff = new Date();
                 this.lastxDate = [{
-                    from: 7,
-                    to: "now",
-                    type: "days",
-                    text: "Last 7 days"
-                }, {
-                    from: 30,
-                    to: "now",
-                    type: "days",
-                    text: "Last 30 days"
-                }, {
-                    from: 1,
-                    to: "now",
-                    type: "year",
-                    text: "Last year"
-                }, {
                     from: 5,
                     to: "now",
                     type: "minutes",
@@ -219,7 +187,22 @@
                     to: "now",
                     type: "hours",
                     text: "Last 3 hours"
-                }, ];
+                }, {
+                    from: 7,
+                    to: "now",
+                    type: "days",
+                    text: "Last 7 days"
+                }, {
+                    from: 30,
+                    to: "now",
+                    type: "days",
+                    text: "Last 30 days"
+                }, {
+                    from: 1,
+                    to: "now",
+                    type: "year",
+                    text: "Last year"
+                }];
             },
 
             applyFrom: function() {
