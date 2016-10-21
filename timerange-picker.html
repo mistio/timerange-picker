@@ -165,6 +165,14 @@
                     type: String,
                     notify: true
                 },
+                step: {
+                    type: String,
+                    notify: true
+                },
+                timeSpan: {
+                    type: Number,
+                    notify: true
+                },
                 durationText: {
                     type: String,
                     value: '-10min - now'
@@ -299,6 +307,57 @@
                 this.innerFrom = moment(start).format('MM/DD/YYYY HH:mm');
                 this.from = Math.floor(start.getTime() / 1000);
             },
+            computeTimespan: function() {
+                var numberof = this.from;
+                if (typeof this.innerFrom === "string") {
+                    console.log("string");
+                    numberof = parseInt(this.innerFrom.match(/\d+/g));
+                    if (this.innerFrom.search("sec") >= 0) {
+                        numberof *= 1;
+                        this.step = "1sec";
+                    } else if (this.innerFrom.search("min") >= 0) {
+                        numberof *= 60;
+                    } else if (this.innerFrom.search("month") >= 0) {
+                        numberof *= 2629746;
+                    } else if (this.innerFrom.search("h") >= 0) {
+                        numberof *= 3600;
+                    } else if (this.innerFrom.search("d") >= 0) {
+                        numberof *= 86400;
+                    } else if (this.innerFrom.search("y") >= 0) {
+                        numberof *= 31556952;
+                    }
+                }
+                var to = this.innerTo;
+                if (this.innerTo == 'now') {
+                    to = Math.floor(new Date().getTime() / 1000);
+                }
+                this.timeSpan = numberof;
+                //less than an  hour
+                if (numberof <= 3600) {
+                    this.step = "10sec";
+                }
+                //less than a day
+                else if (numberof < 86400) {
+                    this.step = "1min";
+                }
+                //less than a month
+                else if (numberof <= 2629746) {
+                    this.step = "30min";
+                }
+                //less than 6 months
+                else if (numberof <= 2629746 * 6) {
+                    this.step = "1h";
+                }
+                //less than year
+                else if (numberof <= 31556952) {
+                    this.step = "5d";
+                }
+                //more than year
+                else {
+                    this.step = "1month";
+                }
+                console.log(this.step);
+            },
             clearSelectedButton: function() {
                 var prevEl = this.querySelector('.range-button[selected="true"]');
                 if (prevEl)
@@ -324,6 +383,7 @@
                     this.datetime = start + "-" + end;
                     this.durationText = this.datetime;
                 }
+                this.computeTimespan();
                 if (this.innerTo != "now") {
                     var df = new Date(this.innerFrom);
                     var dt = new Date(this.innerTo);
