@@ -169,10 +169,6 @@
                     type: String,
                     notify: true
                 },
-                timeSpan: {
-                    type: Number,
-                    notify: true
-                },
                 durationText: {
                     type: String,
                     value: '-10min - now'
@@ -331,7 +327,6 @@
                 if (this.innerTo == 'now') {
                     to = Math.floor(new Date().getTime() / 1000);
                 }
-                this.timeSpan = numberof;
                 //less than an  hour
                 if (numberof <= 3600) {
                     this.step = "10sec";
@@ -356,7 +351,7 @@
                 else {
                     this.step = "1month";
                 }
-                console.log(this.step);
+                return numberof;
             },
             clearSelectedButton: function() {
                 var prevEl = this.querySelector('.range-button[selected="true"]');
@@ -383,7 +378,7 @@
                     this.datetime = start + "-" + end;
                     this.durationText = this.datetime;
                 }
-                this.computeTimespan();
+                var span=this.computeTimespan();
                 if (this.innerTo != "now") {
                     var df = new Date(this.innerFrom);
                     var dt = new Date(this.innerTo);
@@ -396,8 +391,8 @@
                     this.to = dt.getTime() / 1000;
                     this.from = (df.getTime() / 1000) + fromTrigger;
                 } else {
-                    this.to = this.innerTo;
-                    this.from = this.innerFrom;
+                    this.to = Math.floor(new Date().getTime()/1000);
+                    this.from = this.to-span;
                 }
             },
             attached: function() {
