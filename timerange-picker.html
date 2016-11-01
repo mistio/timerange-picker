@@ -142,20 +142,20 @@
                     type: Date
                 },
                 innerFrom: {
-                    type: String,
-                    value: '-10min'
+                    type: String
                 },
                 innerTo: {
-                    type: String,
-                    value: 'now'
+                    type: String
                 },
                 from: {
                     type: String,
-                    notify: true
+                    notify: true,
+                    observer: '_initTime'
                 },
                 to: {
                     type: String,
-                    notify: true
+                    notify: true,
+                    observer: '_initTime'
                 },
                 timeSpan: {
                     type: Number,
@@ -163,7 +163,6 @@
                 },
                 durationText: {
                     type: String,
-                    value: '-10min - now'
                 },
                 autoRefresh: {
                     type: Boolean,
@@ -183,9 +182,9 @@
                     type: "minutes",
                     text: "Last 30 minutes"
                 }, {
-                    from: 60,
+                    from: 1,
                     to: "now",
-                    type: "minutes",
+                    type: "hour",
                     text: "Last 1 hour"
                 }, {
                     from: 3,
@@ -206,10 +205,37 @@
                     from: 1,
                     to: "now",
                     type: "year",
-                    text: "Last year"
+                    text: "Last 1 year"
                 }];
             },
+            _initTime:function(newValue,oldValue){
+              if(oldValue==null){
+                //in case we got timestamps
+                if (typeof newValue != 'string'){
+                  if(this.from==newValue){
+                    this.from= new Date(newValue);
+                  }
+                  else{
+                    this.to=new Date(newValue);
+                  }
+                }else{//in case we got relative time
+                  var ret = newValue.replace('now-', '-');
+                  if (ret.search('min') == -1)
+                      ret = ret.replace('m', 'min');
 
+                  if(this.from==newValue){
+                    console.log("from",ret);
+                    this.from=ret;
+                  }
+                  else{
+                    console.log("to",ret);
+                    this.to=ret;
+                  }
+                }
+                this.durationText=this.from+ " - " +this.to;
+              }
+
+            },
             applyFrom: function() {
                 var dateFrom = this.querySelector('#pickDateFrom'),
                     timeFrom = this.querySelector('#pickTimeFrom');
@@ -234,6 +260,13 @@
                 var from = el.attributes.from.value;
                 var to = el.attributes.to.value;
                 var val = el.attributes.type.value;
+                var text;
+                this.lastxDate.forEach(function(entry) {
+                  if(entry.text.search(from +" "+val)>=0){
+                    text=entry.text;
+                  }
+                });
+                this.durationText=text;
                 var newDate = new Date();
                 switch (val) {
                     case "days":
@@ -243,6 +276,7 @@
                         this.innerFrom = -from + "d";
                         this.diff = from * 86400000;
                         break;
+                    case "hour":
                     case "hours":
                         this.innerFrom = -from + "h";
                         this.diff = from * 3600000;
@@ -258,6 +292,9 @@
                 }
                 this.innerTo = "now";
                 this.querySelector('#plusButton').setAttribute("disabled", "true");
+                this.to=this.innerTo;
+                this.from=this.innerFrom;
+                this.mainDialogOpen=false;
             },
             minusDuration: function() {
                 var diff;
@@ -274,7 +311,7 @@
                 this.querySelector('#plusButton').removeAttribute("disabled");
                 var start = new Date((from * 1000) - diff);
                 var end = new Date((to * 1000) - diff);
-                this.durationText = moment(start).format('MM/DD/YYYY HH:mm') + " - " + moment(end).format('MM/DD/YYYY HH:mm');
+                //this.durationText = moment(start).format('MM/DD/YYYY HH:mm') + " - " + moment(end).format('MM/DD/YYYY HH:mm');
                 this.innerTo = moment(end).format('MM/DD/YYYY HH:mm');
                 this.innerFrom = moment(start).format('MM/DD/YYYY HH:mm');
                 this.to = Math.floor(end.getTime() / 1000);
@@ -284,7 +321,7 @@
                 var diff = this.to * 1000 - this.from * 1000;
                 var start = new Date((this.from * 1000 + diff));
                 var end = new Date((this.to * 1000 + diff));
-                this.durationText = moment(start).format('MM/DD/YYYY HH:mm') + " - " + moment(end).format('MM/DD/YYYY HH:mm');
+                //this.durationText = moment(start).format('MM/DD/YYYY HH:mm') + " - " + moment(end).format('MM/DD/YYYY HH:mm');
                 if (new Date((this.from * 1000 + diff * 3)) >= new Date()) {
                     this.querySelector('#plusButton').setAttribute("disabled", "true");
                     this.to = "now"
@@ -293,6 +330,7 @@
                 }
                 this.innerTo = moment(end).format('MM/DD/YYYY HH:mm');
                 this.innerFrom = moment(start).format('MM/DD/YYYY HH:mm');
+                this.to = Math.floor(end.getTime() / 1000);
                 this.from = Math.floor(start.getTime() / 1000);
             },
             clearSelectedButton: function() {
@@ -317,18 +355,12 @@
                 } else if (selPickT) {
                     this.durationText = selPickT.innerText;
                 } else {
-                    this.datetime = start + "-" + end;
+                    this.datetime = start + " - " + end;
                     this.durationText = this.datetime;
                 }
-                if (this.innerTo != "now") {
+                if (typeof this.innerTo==="number") {
                     var df = new Date(this.innerFrom);
                     var dt = new Date(this.innerTo);
-                    // we use this because we update the graph when ONLY "from" changes value not "To". if we trigger the change with "From" AND "To" there would be double requests etc.
-                    //so in case we change only "To" nothing would have happened
-                    var fromTrigger = 0;
-                    if (this.from == new Date(this.innerFrom).getTime() / 1000) {
-                        fromTrigger = 1;
-                    }
                     this.to = dt.getTime() / 1000;
                     this.from = (df.getTime() / 1000) + fromTrigger;
                 } else {
