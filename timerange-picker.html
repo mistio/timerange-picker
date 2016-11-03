@@ -369,7 +369,6 @@
                 }
                 diff = to * 1000 - from * 1000;
                 this.diff=diff;
-                console.log("DIFF",diff);
                 var start = new Date((from * 1000 + diff));
                 var end = new Date((to * 1000 + diff));
                 if (new Date((to * 1000 + diff*2)) >= new Date()) {
@@ -384,7 +383,6 @@
                 this.durationText= this.innerFrom+" - "+this.innerTo;
                 this.to = Math.floor(end.getTime() / 1000);
                 this.from = Math.floor(start.getTime() / 1000);
-                console.log("plus")
             },
 
             _relativetoTimestamp:function(relative){
@@ -446,22 +444,6 @@
                     this.from = this._relativetoTimestamp(this.innerFrom);
                     console.log(this.to,this.from,"////",this.innerTo,this.innerFrom)
                 }
-
-                // //calc time diffrence in order to check if we should disable or not the "plus time button"
-                // if(typeof this.from ==='string'){
-                //   from=this._relativetoTimestamp(this.from);
-                // }
-                // else{
-                //   from=this.from;
-                // }
-                // if(typeof this.to ==='string'){
-                //   if(this.to=="now"){
-                //     to=Math.floor(new Date().getTime()/1000);
-                //   }
-                //   else{
-                //     to=this._relativetoTimestamp(this.to)
-                //   }
-                // }
                 if (this.to+(this.to-this.from)<= Math.floor(new Date().getTime()/1000)) {
                     this.querySelector('#plusButton').removeAttribute("disabled");
                 }
