@@ -23,105 +23,115 @@
 
 <dom-module id="timerange-picker">
     <template>
-    <style>
-      :host {
-        display: flex;
-        box-sizing: border-box;
-        align-items: center;
-      }
-      paper-button#currenttimerange {
-        background-color: #eee;
-        text-transform: none;
-      }
-      paper-icon-button {
-        padding: 0.7em 0.57em;
-      }
-      paper-icon-button[disabled] {
-        opacity: 0.32;
-      }
-      .time-input paper-icon-button {
-        align-self: flex-end;
-      }
-      .time-input {
-        vertical-align: baseline;
-      }
-      .buttons {
-        justify-content: flex-end;
-      }
-      #timerange {
-        margin-right: 16px;
-      }
-      #quickrange {
-        margin: 0 16px 32px 16px;
-      }
-      paper-dialog h3 {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-      hr {
-        margin: 0;
-      }
-      paper-item {
-        padding: 4px;
-        font-size: 14px;
-        min-height: auto;
-        cursor: pointer;
-      }
-    </style>
-    <paper-icon-button on-tap="minusDuration" icon="icons:chevron-left"></paper-icon-button>
-    <paper-button id="currenttimerange" toggles active="{{mainDialogOpen}}">{{durationText}}</paper-button>
-    <paper-icon-button id="plusButton" disabled="true" on-tap="plusDuration" icon="icons:chevron-right"></paper-icon-button>
+      <style>
+        :host {
+          display: flex;
+          box-sizing: border-box;
+          align-items: center;
+        }
+        paper-button#currenttimerange {
+          background-color: #eee;
+          text-transform: none;
+        }
+        paper-icon-button {
+          padding: 0.7em 0.57em;
+        }
+        paper-icon-button[disabled] {
+          opacity: 0.32;
+        }
+        .time-input paper-icon-button {
+          align-self: flex-end;
+        }
+        .time-input {
+          vertical-align: baseline;
+        }
+        .buttons {
+          justify-content: flex-end;
+        }
+        #timerange {
+          margin-right: 16px;
+        }
+        #quickrange {
+          margin: 0 16px 32px 16px;
+        }
+        paper-dialog h3 {
+          margin-top: 0;
+          margin-bottom: 0;
+        }
+        hr {
+          margin: 0;
+        }
+        paper-item {
+          padding: 4px;
+          font-size: 14px;
+          min-height: auto;
+          cursor: pointer;
+        }
+      </style>
+      <paper-icon-button on-tap="minusDuration" icon="icons:chevron-left"></paper-icon-button>
+      <paper-button id="currenttimerange" toggles active="{{mainDialogOpen}}">{{durationText}}</paper-button>
+      <paper-icon-button id="plusButton" disabled="true" on-tap="plusDuration" icon="icons:chevron-right"></paper-icon-button>
 
-    <paper-dialog opened="{{mainDialogOpen}}" id="dialog" modal class="paper-time-picker-dialog">
-        <div class="layout horizontal">
-          <div id="timerange">
-              <h3>Time Range</h3>
-              <div class="layout horizontal time-input">
-                  <paper-input class="flex" id="from" label="From" value="{{innerFrom}}" on-tap="clearSelectedButton"></paper-input>
-                  <paper-icon-button class="from" toggles active="{{fromDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
-              </div>
-              <div class="layout horizontal time-input">
-                  <paper-input class="flex" id="to" label="To" value="{{innerTo}}" on-tap="clearSelectedButton"></paper-input>
-                  <paper-icon-button class="to" toggles active="{{toDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
+      <paper-dialog opened="{{mainDialogOpen}}" id="dialog" modal class="paper-time-picker-dialog">
+          <div class="layout horizontal">
+            <div id="timerange">
+                <h3>Time Range</h3>
+                <div class="layout horizontal time-input">
+                    <paper-input class="flex" id="from" label="From" value="{{innerFrom}}" on-tap="clearSelectedButton"></paper-input>
+                    <paper-icon-button class="from" toggles active="{{fromDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
+                </div>
+                <div class="layout horizontal time-input">
+                    <paper-input class="flex" id="to" label="To" value="{{innerTo}}" on-tap="clearSelectedButton"></paper-input>
+                    <paper-icon-button class="to" toggles active="{{toDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
+                </div>
+                <paper-dropdown-menu label="Select autorefresh period" placeholder="off">
+                  <paper-menu id="autoRefresh" class="dropdown-content" selected="{{refreshInterval}}" attr-for-selected="data-value" >
+                    <paper-item data-value="0">off</paper-item>
+                    <paper-item data-value="5000">5s</paper-item>
+                    <paper-item data-value="10000">10sec</paper-item>
+                    <paper-item data-value="30000">30sec</paper-item>
+                    <paper-item data-value="60000">1min</paper-item>
+                    <paper-item data-value="300000">5min</paper-item>
+                  </paper-menu>
+                </paper-dropdown-menu>
+            </div>
+            <div id="quickrange">
+                <h3>Quick Ranges</h3>
+                <div id="listbox" role="listbox">
+                    <template is="dom-repeat" items="[[lastxDate]]" as="item">
+                        <paper-item id="range" class$="range-button" from$="[[item.from]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeDuration">[[item.text]]</paper-item>
+                    </template>
+                  </div>
               </div>
           </div>
-          <div id="quickrange">
-              <h3>Quick Ranges</h3>
-              <div id="listbox" role="listbox">
-                  <template is="dom-repeat" items="[[lastxDate]]" as="item">
-                      <paper-item id="range" class$="range-button" from$="[[item.from]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeDuration">[[item.text]]</paper-item>
-                  </template>
-                </div>
-            </div>
-        </div>
-        <hr/>
-        <div class="layout horizontal buttons">
-            <paper-button dialog-dismiss>Cancel</paper-button>
-            <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
-        </div>
-    </paper-dialog>
-    <paper-dialog id="datetime" opened="{{fromDialogOpen}}">
-        <h2>Select from datetime</h2>
-        <div>
-            <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
-            <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
-        </div>
-        <div class="pick-buttons">
-            <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
-            <paper-button dialog-dismiss>Cancel</paper-button>
-        </div>
-    </paper-dialog>
-    <paper-dialog id="datetime" opened="{{toDialogOpen}}">
-        <h2>Select to datetime</h2>
-        <div>
-            <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
-            <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
-        </div>
-        <div class="pick-buttons">
-            <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
-            <paper-button dialog-dismiss>Cancel</paper-button>
-        </div>
-    </paper-dialog>
+          <hr/>
+          <div class="layout horizontal buttons">
+              <paper-button dialog-dismiss>Cancel</paper-button>
+              <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
+          </div>
+      </paper-dialog>
+      <paper-dialog id="datetime" opened="{{fromDialogOpen}}">
+          <h2>Select from datetime</h2>
+          <div>
+              <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
+              <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
+          </div>
+          <div class="pick-buttons">
+              <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
+              <paper-button dialog-dismiss>Cancel</paper-button>
+          </div>
+      </paper-dialog>
+      <paper-dialog id="datetime" opened="{{toDialogOpen}}">
+          <h2>Select to datetime</h2>
+          <div>
+              <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
+              <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
+          </div>
+          <div class="pick-buttons">
+              <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
+              <paper-button dialog-dismiss>Cancel</paper-button>
+          </div>
+      </paper-dialog>
     </template>
 
     <script>
@@ -142,20 +152,20 @@
                     type: Date
                 },
                 innerFrom: {
-                    type: String,
-                    value: '-10min'
+                    type: String
                 },
                 innerTo: {
-                    type: String,
-                    value: 'now'
+                    type: String
                 },
                 from: {
                     type: String,
-                    notify: true
+                    notify: true,
+                    observer: '_initTime'
                 },
                 to: {
                     type: String,
-                    notify: true
+                    notify: true,
+                    observer: '_initTime'
                 },
                 timeSpan: {
                     type: Number,
@@ -163,7 +173,6 @@
                 },
                 durationText: {
                     type: String,
-                    value: '-10min - now'
                 },
                 autoRefresh: {
                     type: Boolean,
@@ -183,9 +192,9 @@
                     type: "minutes",
                     text: "Last 30 minutes"
                 }, {
-                    from: 60,
+                    from: 1,
                     to: "now",
-                    type: "minutes",
+                    type: "hour",
                     text: "Last 1 hour"
                 }, {
                     from: 3,
@@ -206,8 +215,55 @@
                     from: 1,
                     to: "now",
                     type: "year",
-                    text: "Last year"
+                    text: "Last 1 year"
                 }];
+            },
+            _initTime:function(newValue,oldValue){
+              this.refreshInterval=0;
+              if(this.innerTo==null || this.innerTo==""){
+                this.innerTo=this.to;
+                this.innerFrom=this.from;
+              }
+              if(oldValue==null){
+                //in case we got timestamps
+                if (typeof newValue != 'string'){
+                  if(this.from==newValue){
+                    this.from= new Date(newValue);
+                  }
+                  else{
+                    this.to=new Date(newValue);
+                  }
+                }else{//in case we got relative time
+                  var ret = newValue.replace('now-', '-');
+                  if (ret.search('min') == -1 && ret.search('month')==-1)
+                      ret = ret.replace('m', 'min');
+
+                  if(this.from==newValue){
+                    this.from=ret;
+                  }
+                  else{
+                    this.to=ret;
+                  }
+                }
+                if(this.to=='now' && typeof this.from==='string'){
+                  var digits=parseInt(this.from.match(/\d+/g));
+                  var unit;
+                  if(this.from.search("min")){
+                    unit="minutes"
+                  }else if(this.from.search("d")){
+                    unit="days"
+                  }else if(this.from.search("y")){
+                    unit="years";
+                  }else if(this.from.seach("month")){
+                    unit="months";
+                  }else if(this.from.seach("h")){
+                    unit="hours";
+                  }
+                  this.durationText="Last "+digits+" "+unit;
+                }else{
+                  this.durationText=this.from+ " - " +this.to;
+                }
+              }
             },
 
             applyFrom: function() {
@@ -218,10 +274,14 @@
             },
 
             applyTo: function() {
+                console.log("applying to")
                 var dateTo = this.querySelector('#pickDateTo'),
                     timeTo = this.querySelector('#pickTimeTo');
                 this.innerTo = moment(dateTo.date).format('MM/DD/YYYY');
                 this.innerTo += " " + moment(timeTo.time.toString(), "hh:mm A").format('HH:mm');
+                if(this.innerTo!='now' || this.innerTo!= Math.floor(new Date(),getTime()/1000)){
+                  this.querySelector('#autoRefresh').removeAttribute('disable');
+                }
             },
 
             computeDuration: function(e) {
@@ -234,15 +294,20 @@
                 var from = el.attributes.from.value;
                 var to = el.attributes.to.value;
                 var val = el.attributes.type.value;
+                var text;
+                this.lastxDate.forEach(function(entry) {
+                  if(entry.text.search(from +" "+val)>=0){
+                    text=entry.text;
+                  }
+                });
+                this.durationText=text;
                 var newDate = new Date();
                 switch (val) {
                     case "days":
-                        //alternatively for all
-                        //moment(new Date(pastDays)).format('MM/DD/YYYY HH:mm');
-                        //var pastDays = newDate.setDate(newDate.getDate() - from);
                         this.innerFrom = -from + "d";
                         this.diff = from * 86400000;
                         break;
+                    case "hour":
                     case "hours":
                         this.innerFrom = -from + "h";
                         this.diff = from * 3600000;
@@ -259,54 +324,101 @@
                 this.innerTo = "now";
                 this.querySelector('#plusButton').setAttribute("disabled", "true");
             },
+
             minusDuration: function() {
-                var diff;
-                var from = this.from;
-                var to = this.to;
+                var diff,from,to;
+                if(typeof this.from ==='string'){
+                  from=this._relativetoTimestamp(this.from);
+                }else{
+                  from = this.from;
+                }
+                if(typeof this.to ==='string' && this.to!='now'){
+                  to=this._relativetoTimestamp(this.to);
+                }else{
+                  to = this.to;
+                }
                 if (this.innerTo == "now" || this.to == "now") {
                     diff = this.diff;
                     to = Math.floor(new Date().getTime() / 1000);
                     from = to - this.diff / 1000;
                 } else {
-                    diff = this.to * 1000 - this.from * 1000;
+                    diff = to * 1000 - from * 1000;
                     this.diff = diff;
                 }
                 this.querySelector('#plusButton').removeAttribute("disabled");
                 var start = new Date((from * 1000) - diff);
                 var end = new Date((to * 1000) - diff);
-                this.durationText = moment(start).format('MM/DD/YYYY HH:mm') + " - " + moment(end).format('MM/DD/YYYY HH:mm');
                 this.innerTo = moment(end).format('MM/DD/YYYY HH:mm');
                 this.innerFrom = moment(start).format('MM/DD/YYYY HH:mm');
+                this.durationText= this.innerFrom+" - "+this.innerTo;
                 this.to = Math.floor(end.getTime() / 1000);
                 this.from = Math.floor(start.getTime() / 1000);
             },
+
             plusDuration: function() {
-                var diff = this.to * 1000 - this.from * 1000;
-                var start = new Date((this.from * 1000 + diff));
-                var end = new Date((this.to * 1000 + diff));
-                this.durationText = moment(start).format('MM/DD/YYYY HH:mm') + " - " + moment(end).format('MM/DD/YYYY HH:mm');
-                if (new Date((this.from * 1000 + diff * 3)) >= new Date()) {
+                var diff,from,to;
+                if(typeof this.from ==='string'){
+                  from=this._relativetoTimestamp(this.from);
+                }else{
+                  from = this.from;
+                }
+                if(typeof this.to ==='string' && this.to!='now'){
+                  to=this._relativetoTimestamp(this.to);
+                }else{
+                  to = this.to;
+                }
+                diff = to * 1000 - from * 1000;
+                this.diff=diff;
+                var start = new Date((from * 1000 + diff));
+                var end = new Date((to * 1000 + diff));
+                if (new Date((to * 1000 + diff*2)) >= new Date()) {
                     this.querySelector('#plusButton').setAttribute("disabled", "true");
                     this.to = "now"
-                } else {
-                    this.to = Math.floor(end.getTime() / 1000);
+                    this.innerTo="now"
                 }
-                this.innerTo = moment(end).format('MM/DD/YYYY HH:mm');
+                else{
+                    this.innerTo = moment(end).format('MM/DD/YYYY HH:mm');
+                }
                 this.innerFrom = moment(start).format('MM/DD/YYYY HH:mm');
+                this.durationText= this.innerFrom+" - "+this.innerTo;
+                this.to = Math.floor(end.getTime() / 1000);
                 this.from = Math.floor(start.getTime() / 1000);
             },
+
+            _relativetoTimestamp:function(relative){
+                var timestamp=relative;
+                var now= Math.floor(new Date().getTime()/1000);
+                if(relative.search("/")==-1 && relative !='now'){
+                  var  parsedDigits = parseInt(relative.match(/\d+/g));
+                  if (relative.search("y") >= 0) { // time in years
+                      timestamp = now - parsedDigits *  31556952;
+                  } else if (relative.search("month") >= 0) { // time in months
+                      timestamp = now - parsedDigits * 2629746;
+                  } else if (relative.search("d") >= 0) { // time in days
+                      timestamp = now - parsedDigits * 86400;
+                  } else if (relative.search("h") >= 0) { // time in hours
+                      timestamp = now - parsedDigits * 3600;
+                  } else if (relative.search("m") >= 0) { // time in mins
+                      timestamp = now - parsedDigits * 60;
+                  } else { // time in secs
+                      timestamp = now - parsedDigits;
+                  }
+                }
+                else if(relative!='now'){
+                  timestamp=Math.floor(new Date(relative).getTime()/1000);
+                }
+                return timestamp;
+            },
+
             clearSelectedButton: function() {
                 var prevEl = this.querySelector('.range-button[selected="true"]');
                 if (prevEl)
                     prevEl.setAttribute("selected", false);
             },
+
             addNewDate: function() {
                 var start = this.$.from.value;
                 var end = this.$.to.value;
-                var date = this.$.pickDateFrom.value;
-                var time = this.$.pickTimeFrom.value;
-                var date2 = this.$.pickDateTo.value;
-                var time2 = this.$.pickTimeTo.value;
                 var selPickD = this.querySelector('.date-button[selected="true"]');
                 var selPickT = this.querySelector('.time-button[selected="true"]');
                 var selEl = this.querySelector('.range-button[selected="true"]');
@@ -317,25 +429,28 @@
                 } else if (selPickT) {
                     this.durationText = selPickT.innerText;
                 } else {
-                    this.datetime = start + "-" + end;
+                    this.datetime = start + " - " + end;
                     this.durationText = this.datetime;
                 }
-                if (this.innerTo != "now") {
+                var diff,from,to;
+                if (typeof this.innerTo==="number") {
                     var df = new Date(this.innerFrom);
                     var dt = new Date(this.innerTo);
-                    // we use this because we update the graph when ONLY "from" changes value not "To". if we trigger the change with "From" AND "To" there would be double requests etc.
-                    //so in case we change only "To" nothing would have happened
-                    var fromTrigger = 0;
-                    if (this.from == new Date(this.innerFrom).getTime() / 1000) {
-                        fromTrigger = 1;
-                    }
                     this.to = dt.getTime() / 1000;
-                    this.from = (df.getTime() / 1000) + fromTrigger;
+                    this.from = (df.getTime() / 1000);
+
                 } else {
-                    this.to = this.innerTo;
-                    this.from = this.innerFrom;
+                    this.to = this._relativetoTimestamp(this.innerTo);
+                    this.from = this._relativetoTimestamp(this.innerFrom);
+                    console.log(this.to,this.from,"////",this.innerTo,this.innerFrom)
                 }
+                if (this.to+(this.to-this.from)<= Math.floor(new Date().getTime()/1000)) {
+                    this.querySelector('#plusButton').removeAttribute("disabled");
+                }
+                if(this.refreshInterval>0)
+                  this.fire('refresh',this.refreshInterval);
             },
+
             attached: function() {
                 // `attached` fires once the element and its parents have been inserted
                 // into a document.
