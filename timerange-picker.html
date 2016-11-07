@@ -84,14 +84,12 @@
                     <paper-input class="flex" id="to" label="To" value="{{innerTo}}" on-tap="clearSelectedButton"></paper-input>
                     <paper-icon-button class="to" toggles active="{{toDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
                 </div>
-                <paper-dropdown-menu id="autoRefresh" label="Select autorefresh period" placeholder="off">
-                  <paper-menu class="dropdown-content" selected="{{interval}}" attr-for-selected="data-value" >
+                <paper-dropdown-menu id="refreshIntervalMenu" label="auto refresh" placeholder="off">
+                  <paper-menu class="dropdown-content" selected="{{dropdownIntervalSelection}}" attr-for-selected="data-value" >
                     <paper-item data-value="0">off</paper-item>
-                    <paper-item data-value="5000">5s</paper-item>
-                    <paper-item data-value="10000">10sec</paper-item>
-                    <paper-item data-value="30000">30sec</paper-item>
-                    <paper-item data-value="60000">1min</paper-item>
-                    <paper-item data-value="300000">5min</paper-item>
+                    <paper-item data-value="10000">every 10sec</paper-item>
+                    <paper-item data-value="60000">every 1min</paper-item>
+                    <paper-item data-value="600000">every 10min</paper-item>
                   </paper-menu>
                 </paper-dropdown-menu>
             </div>
@@ -181,15 +179,15 @@
                 }
             },
             _openDialog: function() {
-                this.interval = 0;
+                this.dropdownIntervalSelection = 0;
                 this.refreshInterval = 0;
             },
             _refreshOption: function() {
                 if (this.innerTo == 'now' || this.innerTo == Math.floor(new Date().getTime() / 1000)) {
-                    this.querySelector('#autoRefresh').removeAttribute('disabled');
+                    this.querySelector('#refreshIntervalMenu').removeAttribute('disabled');
                 } else {
-                    this.querySelector('#autoRefresh').setAttribute("disabled", "true");
-                    this.interval = 0;
+                    this.querySelector('#refreshIntervalMenu').setAttribute("disabled", "true");
+                    this.dropdownIntervalSelection = 0;
                 }
             },
             ready: function() {
@@ -437,7 +435,7 @@
                     this.datetime = start + " - " + end;
                     this.durationText = this.datetime;
                 }
-                this.refreshInterval = this.interval;
+                this.refreshInterval = this.dropdownIntervalSelection;
                 var diff, from, to;
                 if (typeof this.innerTo === "number") {
                     var df = new Date(this.innerFrom);
