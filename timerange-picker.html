@@ -22,7 +22,7 @@
 -->
 
 <dom-module id="timerange-picker">
-    <template>
+  <template>
       <style>
         :host {
           display: flex;
@@ -69,7 +69,7 @@
         }
       </style>
       <paper-icon-button on-tap="minusDuration" icon="icons:chevron-left"></paper-icon-button>
-      <paper-button id="currenttimerange" toggles active="{{mainDialogOpen}}">{{durationText}}</paper-button>
+      <paper-button id="currenttimerange" toggles active="{{mainDialogOpen}}" on-tap="_openDialog">{{durationText}}</paper-button>
       <paper-icon-button id="plusButton" disabled="true" on-tap="plusDuration" icon="icons:chevron-right"></paper-icon-button>
 
       <paper-dialog opened="{{mainDialogOpen}}" id="dialog" modal class="paper-time-picker-dialog">
@@ -84,8 +84,8 @@
                     <paper-input class="flex" id="to" label="To" value="{{innerTo}}" on-tap="clearSelectedButton"></paper-input>
                     <paper-icon-button class="to" toggles active="{{toDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
                 </div>
-                <paper-dropdown-menu label="Select autorefresh period" placeholder="off">
-                  <paper-menu id="autoRefresh" class="dropdown-content" selected="{{refreshInterval}}" attr-for-selected="data-value" >
+                <paper-dropdown-menu id="autoRefresh" label="Select autorefresh period" placeholder="off">
+                  <paper-menu class="dropdown-content" selected="{{interval}}" attr-for-selected="data-value" >
                     <paper-item data-value="0">off</paper-item>
                     <paper-item data-value="5000">5s</paper-item>
                     <paper-item data-value="10000">10sec</paper-item>
@@ -101,38 +101,38 @@
                     <template is="dom-repeat" items="[[lastxDate]]" as="item">
                         <paper-item id="range" class$="range-button" from$="[[item.from]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeDuration">[[item.text]]</paper-item>
                     </template>
-                  </div>
-              </div>
+                </div>
+            </div>
           </div>
-          <hr/>
-          <div class="layout horizontal buttons">
-              <paper-button dialog-dismiss>Cancel</paper-button>
-              <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
-          </div>
-      </paper-dialog>
-      <paper-dialog id="datetime" opened="{{fromDialogOpen}}">
-          <h2>Select from datetime</h2>
-          <div>
-              <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
-              <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
-          </div>
-          <div class="pick-buttons">
-              <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
-              <paper-button dialog-dismiss>Cancel</paper-button>
-          </div>
-      </paper-dialog>
-      <paper-dialog id="datetime" opened="{{toDialogOpen}}">
-          <h2>Select to datetime</h2>
-          <div>
-              <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
-              <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
-          </div>
-          <div class="pick-buttons">
-              <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
-              <paper-button dialog-dismiss>Cancel</paper-button>
-          </div>
-      </paper-dialog>
-    </template>
+    <hr/>
+    <div class="layout horizontal buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
+    </div>
+    </paper-dialog>
+    <paper-dialog id="datetime" opened="{{fromDialogOpen}}">
+        <h2>Select from datetime</h2>
+        <div>
+            <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
+            <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
+        </div>
+        <div class="pick-buttons">
+            <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
+            <paper-button dialog-dismiss>Cancel</paper-button>
+        </div>
+    </paper-dialog>
+    <paper-dialog id="datetime" opened="{{toDialogOpen}}">
+        <h2>Select to datetime</h2>
+        <div>
+            <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
+            <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
+        </div>
+        <div class="pick-buttons">
+            <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
+            <paper-button dialog-dismiss>Cancel</paper-button>
+        </div>
+    </paper-dialog>
+  </template>
 
     <script>
         Polymer({
@@ -155,7 +155,8 @@
                     type: String
                 },
                 innerTo: {
-                    type: String
+                    type: String,
+                    observer: '_refreshOption'
                 },
                 from: {
                     type: String,
@@ -174,11 +175,23 @@
                 durationText: {
                     type: String,
                 },
-                autoRefresh: {
-                    type: Boolean,
+                refreshInterval: {
+                    type: Number,
+                    notify: true
                 }
             },
-
+            _openDialog: function() {
+                this.interval = 0;
+                this.refreshInterval = 0;
+            },
+            _refreshOption: function() {
+                if (this.innerTo == 'now' || this.innerTo == Math.floor(new Date().getTime() / 1000)) {
+                    this.querySelector('#autoRefresh').removeAttribute('disabled');
+                } else {
+                    this.querySelector('#autoRefresh').setAttribute("disabled", "true");
+                    this.interval = 0;
+                }
+            },
             ready: function() {
                 this.endOfDiff = new Date();
                 this.lastxDate = [{
@@ -218,52 +231,49 @@
                     text: "Last 1 year"
                 }];
             },
-            _initTime:function(newValue,oldValue){
-              this.refreshInterval=0;
-              if(this.innerTo==null || this.innerTo==""){
-                this.innerTo=this.to;
-                this.innerFrom=this.from;
-              }
-              if(oldValue==null){
-                //in case we got timestamps
-                if (typeof newValue != 'string'){
-                  if(this.from==newValue){
-                    this.from= new Date(newValue);
-                  }
-                  else{
-                    this.to=new Date(newValue);
-                  }
-                }else{//in case we got relative time
-                  var ret = newValue.replace('now-', '-');
-                  if (ret.search('min') == -1 && ret.search('month')==-1)
-                      ret = ret.replace('m', 'min');
+            _initTime: function(newValue, oldValue) {
+                if (this.innerTo == null || this.innerTo == "") {
+                    this.innerTo = this.to;
+                    this.innerFrom = this.from;
+                }
+                if (oldValue == null) {
+                    //in case we got timestamps
+                    if (typeof newValue != 'string') {
+                        if (this.from == newValue) {
+                            this.from = new Date(newValue);
+                        } else {
+                            this.to = new Date(newValue);
+                        }
+                    } else { //in case we got relative time
+                        var ret = newValue.replace('now-', '-');
+                        if (ret.search('min') == -1 && ret.search('month') == -1)
+                            ret = ret.replace('m', 'min');
 
-                  if(this.from==newValue){
-                    this.from=ret;
-                  }
-                  else{
-                    this.to=ret;
-                  }
+                        if (this.from == newValue) {
+                            this.from = ret;
+                        } else {
+                            this.to = ret;
+                        }
+                    }
+                    if (this.to == 'now' && typeof this.from === 'string') {
+                        var digits = parseInt(this.from.match(/\d+/g));
+                        var unit;
+                        if (this.from.search("min")) {
+                            unit = "minutes"
+                        } else if (this.from.search("d")) {
+                            unit = "days"
+                        } else if (this.from.search("y")) {
+                            unit = "years";
+                        } else if (this.from.seach("month")) {
+                            unit = "months";
+                        } else if (this.from.seach("h")) {
+                            unit = "hours";
+                        }
+                        this.durationText = "Last " + digits + " " + unit;
+                    } else {
+                        this.durationText = this.from + " - " + this.to;
+                    }
                 }
-                if(this.to=='now' && typeof this.from==='string'){
-                  var digits=parseInt(this.from.match(/\d+/g));
-                  var unit;
-                  if(this.from.search("min")){
-                    unit="minutes"
-                  }else if(this.from.search("d")){
-                    unit="days"
-                  }else if(this.from.search("y")){
-                    unit="years";
-                  }else if(this.from.seach("month")){
-                    unit="months";
-                  }else if(this.from.seach("h")){
-                    unit="hours";
-                  }
-                  this.durationText="Last "+digits+" "+unit;
-                }else{
-                  this.durationText=this.from+ " - " +this.to;
-                }
-              }
             },
 
             applyFrom: function() {
@@ -279,9 +289,6 @@
                     timeTo = this.querySelector('#pickTimeTo');
                 this.innerTo = moment(dateTo.date).format('MM/DD/YYYY');
                 this.innerTo += " " + moment(timeTo.time.toString(), "hh:mm A").format('HH:mm');
-                if(this.innerTo!='now' || this.innerTo!= Math.floor(new Date(),getTime()/1000)){
-                  this.querySelector('#autoRefresh').removeAttribute('disable');
-                }
             },
 
             computeDuration: function(e) {
@@ -296,11 +303,11 @@
                 var val = el.attributes.type.value;
                 var text;
                 this.lastxDate.forEach(function(entry) {
-                  if(entry.text.search(from +" "+val)>=0){
-                    text=entry.text;
-                  }
+                    if (entry.text.search(from + " " + val) >= 0) {
+                        text = entry.text;
+                    }
                 });
-                this.durationText=text;
+                this.durationText = text;
                 var newDate = new Date();
                 switch (val) {
                     case "days":
@@ -326,16 +333,16 @@
             },
 
             minusDuration: function() {
-                var diff,from,to;
-                if(typeof this.from ==='string'){
-                  from=this._relativetoTimestamp(this.from);
-                }else{
-                  from = this.from;
+                var diff, from, to;
+                if (typeof this.from === 'string') {
+                    from = this._relativetoTimestamp(this.from);
+                } else {
+                    from = this.from;
                 }
-                if(typeof this.to ==='string' && this.to!='now'){
-                  to=this._relativetoTimestamp(this.to);
-                }else{
-                  to = this.to;
+                if (typeof this.to === 'string' && this.to != 'now') {
+                    to = this._relativetoTimestamp(this.to);
+                } else {
+                    to = this.to;
                 }
                 if (this.innerTo == "now" || this.to == "now") {
                     diff = this.diff;
@@ -350,62 +357,60 @@
                 var end = new Date((to * 1000) - diff);
                 this.innerTo = moment(end).format('MM/DD/YYYY HH:mm');
                 this.innerFrom = moment(start).format('MM/DD/YYYY HH:mm');
-                this.durationText= this.innerFrom+" - "+this.innerTo;
+                this.durationText = this.innerFrom + " - " + this.innerTo;
                 this.to = Math.floor(end.getTime() / 1000);
                 this.from = Math.floor(start.getTime() / 1000);
             },
 
             plusDuration: function() {
-                var diff,from,to;
-                if(typeof this.from ==='string'){
-                  from=this._relativetoTimestamp(this.from);
-                }else{
-                  from = this.from;
+                var diff, from, to;
+                if (typeof this.from === 'string') {
+                    from = this._relativetoTimestamp(this.from);
+                } else {
+                    from = this.from;
                 }
-                if(typeof this.to ==='string' && this.to!='now'){
-                  to=this._relativetoTimestamp(this.to);
-                }else{
-                  to = this.to;
+                if (typeof this.to === 'string' && this.to != 'now') {
+                    to = this._relativetoTimestamp(this.to);
+                } else {
+                    to = this.to;
                 }
                 diff = to * 1000 - from * 1000;
-                this.diff=diff;
+                this.diff = diff;
                 var start = new Date((from * 1000 + diff));
                 var end = new Date((to * 1000 + diff));
-                if (new Date((to * 1000 + diff*2)) >= new Date()) {
+                if (new Date((to * 1000 + diff * 2)) >= new Date()) {
                     this.querySelector('#plusButton').setAttribute("disabled", "true");
                     this.to = "now"
-                    this.innerTo="now"
-                }
-                else{
+                    this.innerTo = "now"
+                } else {
                     this.innerTo = moment(end).format('MM/DD/YYYY HH:mm');
                 }
                 this.innerFrom = moment(start).format('MM/DD/YYYY HH:mm');
-                this.durationText= this.innerFrom+" - "+this.innerTo;
+                this.durationText = this.innerFrom + " - " + this.innerTo;
                 this.to = Math.floor(end.getTime() / 1000);
                 this.from = Math.floor(start.getTime() / 1000);
             },
 
-            _relativetoTimestamp:function(relative){
-                var timestamp=relative;
-                var now= Math.floor(new Date().getTime()/1000);
-                if(relative.search("/")==-1 && relative !='now'){
-                  var  parsedDigits = parseInt(relative.match(/\d+/g));
-                  if (relative.search("y") >= 0) { // time in years
-                      timestamp = now - parsedDigits *  31556952;
-                  } else if (relative.search("month") >= 0) { // time in months
-                      timestamp = now - parsedDigits * 2629746;
-                  } else if (relative.search("d") >= 0) { // time in days
-                      timestamp = now - parsedDigits * 86400;
-                  } else if (relative.search("h") >= 0) { // time in hours
-                      timestamp = now - parsedDigits * 3600;
-                  } else if (relative.search("m") >= 0) { // time in mins
-                      timestamp = now - parsedDigits * 60;
-                  } else { // time in secs
-                      timestamp = now - parsedDigits;
-                  }
-                }
-                else if(relative!='now'){
-                  timestamp=Math.floor(new Date(relative).getTime()/1000);
+            _relativetoTimestamp: function(relative) {
+                var timestamp = relative;
+                var now = Math.floor(new Date().getTime() / 1000);
+                if (relative.search("/") == -1 && relative != 'now') {
+                    var parsedDigits = parseInt(relative.match(/\d+/g));
+                    if (relative.search("y") >= 0) { // time in years
+                        timestamp = now - parsedDigits * 31556952;
+                    } else if (relative.search("month") >= 0) { // time in months
+                        timestamp = now - parsedDigits * 2629746;
+                    } else if (relative.search("d") >= 0) { // time in days
+                        timestamp = now - parsedDigits * 86400;
+                    } else if (relative.search("h") >= 0) { // time in hours
+                        timestamp = now - parsedDigits * 3600;
+                    } else if (relative.search("m") >= 0) { // time in mins
+                        timestamp = now - parsedDigits * 60;
+                    } else { // time in secs
+                        timestamp = now - parsedDigits;
+                    }
+                } else if (relative != 'now') {
+                    timestamp = Math.floor(new Date(relative).getTime() / 1000);
                 }
                 return timestamp;
             },
@@ -432,8 +437,9 @@
                     this.datetime = start + " - " + end;
                     this.durationText = this.datetime;
                 }
-                var diff,from,to;
-                if (typeof this.innerTo==="number") {
+                this.refreshInterval = this.interval;
+                var diff, from, to;
+                if (typeof this.innerTo === "number") {
                     var df = new Date(this.innerFrom);
                     var dt = new Date(this.innerTo);
                     this.to = dt.getTime() / 1000;
@@ -442,13 +448,11 @@
                 } else {
                     this.to = this._relativetoTimestamp(this.innerTo);
                     this.from = this._relativetoTimestamp(this.innerFrom);
-                    console.log(this.to,this.from,"////",this.innerTo,this.innerFrom)
+                    console.log(this.to, this.from, "////", this.innerTo, this.innerFrom)
                 }
-                if (this.to+(this.to-this.from)<= Math.floor(new Date().getTime()/1000)) {
+                if (this.to + (this.to - this.from) <= Math.floor(new Date().getTime() / 1000)) {
                     this.querySelector('#plusButton').removeAttribute("disabled");
                 }
-                if(this.refreshInterval>0)
-                  this.fire('refresh',this.refreshInterval);
             },
 
             attached: function() {
