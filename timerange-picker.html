@@ -84,7 +84,7 @@
                     <paper-input class="flex" id="to" label="To" value="{{innerTo}}" on-tap="clearSelectedButton"></paper-input>
                     <paper-icon-button class="to" toggles active="{{toDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
                 </div>
-                <paper-dropdown-menu id="refreshIntervalMenu" label="auto refresh" placeholder="off">
+                <paper-dropdown-menu id="refreshIntervalMenu" disabled="{{_innerToValue(innerTo)}}" label="auto refresh" placeholder="off">
                   <paper-menu class="dropdown-content" selected="{{dropdownIntervalSelection}}" attr-for-selected="data-value" >
                     <paper-item data-value="0">off</paper-item>
                     <paper-item data-value="10000">every 10sec</paper-item>
@@ -153,8 +153,7 @@
                     type: String
                 },
                 innerTo: {
-                    type: String,
-                    observer: '_refreshOption'
+                    type: String
                 },
                 from: {
                     type: String,
@@ -178,18 +177,19 @@
                     notify: true
                 }
             },
+            _innerToValue:function(val){
+              console.log(val);
+              if(val=='now'){
+                return false;
+              }else{
+                return true;
+              }
+            },
             _openDialog: function() {
                 this.dropdownIntervalSelection = 0;
                 this.refreshInterval = 0;
             },
-            _refreshOption: function() {
-                if (this.innerTo == 'now' || this.innerTo == Math.floor(new Date().getTime() / 1000)) {
-                    this.querySelector('#refreshIntervalMenu').removeAttribute('disabled');
-                } else {
-                    this.querySelector('#refreshIntervalMenu').setAttribute("disabled", "true");
-                    this.dropdownIntervalSelection = 0;
-                }
-            },
+
             ready: function() {
                 this.endOfDiff = new Date();
                 this.lastxDate = [{
@@ -402,7 +402,7 @@
                         timestamp = now - parsedDigits * 86400;
                     } else if (relative.search("h") >= 0) { // time in hours
                         timestamp = now - parsedDigits * 3600;
-                    } else if (relative.search("m") >= 0) { // time in mins
+                    } else if (relative.search("m") >= 0 || relative.search("min") >= 0) { // time in mins
                         timestamp = now - parsedDigits * 60;
                     } else { // time in secs
                         timestamp = now - parsedDigits;
