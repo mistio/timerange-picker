@@ -253,27 +253,29 @@
                             this.to = ret;
                         }
                     }
-                    if (this.to == 'now' && typeof this.from === 'string') {
-                        var digits = parseInt(this.from.match(/\d+/g));
-                        var unit;
-                        if (this.from.search("min")) {
-                            unit = "minutes"
-                        } else if (this.from.search("d")) {
-                            unit = "days"
-                        } else if (this.from.search("y")) {
-                            unit = "years";
-                        } else if (this.from.seach("month")) {
-                            unit = "months";
-                        } else if (this.from.seach("h")) {
-                            unit = "hours";
-                        }
-                        this.durationText = "Last " + digits + " " + unit;
-                    } else {
-                        this.durationText = this.from + " - " + this.to;
-                    }
+                    this._computeDurationText(this.from,this.to);
                 }
             },
-
+            _computeDurationText:function(from,to){
+              if (to == 'now' && typeof from === 'string' && from.search("/")==-1) {
+                  var digits = parseInt(from.match(/\d+/g));
+                  var unit;
+                  if (from.search("min")) {
+                      unit = "minutes"
+                  } else if (from.search("d")) {
+                      unit = "days"
+                  } else if (from.search("y")) {
+                      unit = "years";
+                  } else if (from.seach("month")) {
+                      unit = "months";
+                  } else if (from.seach("h")) {
+                      unit = "hours";
+                  }
+                  this.durationText = "Last " + digits + " " + unit;
+              } else {
+                  this.durationText = from + " - " + to;
+              }
+            },
             applyFrom: function() {
                 var dateFrom = this.querySelector('#pickDateFrom'),
                     timeFrom = this.querySelector('#pickTimeFrom');
@@ -299,13 +301,7 @@
                 var from = el.attributes.from.value;
                 var to = el.attributes.to.value;
                 var val = el.attributes.type.value;
-                var text;
-                this.lastxDate.forEach(function(entry) {
-                    if (entry.text.search(from + " " + val) >= 0) {
-                        text = entry.text;
-                    }
-                });
-                this.durationText = text;
+
                 var newDate = new Date();
                 switch (val) {
                     case "days":
@@ -355,7 +351,6 @@
                 var end = new Date((to * 1000) - diff);
                 this.innerTo = moment(end).format('MM/DD/YYYY HH:mm');
                 this.innerFrom = moment(start).format('MM/DD/YYYY HH:mm');
-                this.durationText = this.innerFrom + " - " + this.innerTo;
                 this.to = Math.floor(end.getTime() / 1000);
                 this.from = Math.floor(start.getTime() / 1000);
             },
@@ -384,7 +379,6 @@
                     this.innerTo = moment(end).format('MM/DD/YYYY HH:mm');
                 }
                 this.innerFrom = moment(start).format('MM/DD/YYYY HH:mm');
-                this.durationText = this.innerFrom + " - " + this.innerTo;
                 this.to = Math.floor(end.getTime() / 1000);
                 this.from = Math.floor(start.getTime() / 1000);
             },
@@ -425,16 +419,6 @@
                 var selPickD = this.querySelector('.date-button[selected="true"]');
                 var selPickT = this.querySelector('.time-button[selected="true"]');
                 var selEl = this.querySelector('.range-button[selected="true"]');
-                if (selEl) {
-                    this.durationText = selEl.innerText;
-                } else if (selPickD) {
-                    this.durationText = selPickD.innerText;
-                } else if (selPickT) {
-                    this.durationText = selPickT.innerText;
-                } else {
-                    this.datetime = start + " - " + end;
-                    this.durationText = this.datetime;
-                }
                 this.refreshInterval = this.dropdownIntervalSelection;
                 var diff, from, to;
                 if (typeof this.innerTo === "number") {
@@ -451,6 +435,8 @@
                 if (this.to + (this.to - this.from) <= Math.floor(new Date().getTime() / 1000)) {
                     this.querySelector('#plusButton').removeAttribute("disabled");
                 }
+                this._computeDurationText(this.innerFrom,this.innerTo);
+                console.log(this.durationText)
             },
 
             attached: function() {
