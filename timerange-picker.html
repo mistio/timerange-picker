@@ -229,52 +229,71 @@
                     text: "Last 1 year"
                 }];
             },
-            _initTime: function(newValue, oldValue) {
-                if (this.innerTo == null || this.innerTo == "") {
-                    this.innerTo = this.to;
-                    this.innerFrom = this.from;
-                }
-                if (oldValue == null) {
-                    //in case we got timestamps
-                    if (typeof newValue != 'string') {
-                        if (this.from == newValue) {
-                            this.from = new Date(newValue);
-                        } else {
-                            this.to = new Date(newValue);
-                        }
-                    } else { //in case we got relative time
-                        var ret = newValue.replace('now-', '-');
-                        if (ret.search('min') == -1 && ret.search('month') == -1)
-                            ret = ret.replace('m', 'min');
-
-                        if (this.from == newValue) {
-                            this.from = ret;
-                        } else {
-                            this.to = ret;
-                        }
+            _computeDurationText:function(from,to){
+                if (to == 'now' && typeof from === 'string' && from.search("/")==-1) {
+                    var digits = parseInt(from.match(/\d+/g));
+                    var unit;
+                    if (from.search("min")) {
+                        unit = "minutes"
+                    } else if (from.search("d")) {
+                        unit = "days"
+                    } else if (from.search("y")) {
+                        unit = "years";
+                    } else if (from.seach("month")) {
+                        unit = "months";
+                    } else if (from.seach("h")) {
+                        unit = "hours";
                     }
-                    this._computeDurationText(this.from,this.to);
+                    this.durationText = "Last " + digits + " " + unit;
+                } else {
+                    this.durationText = from + " - " + to;
                 }
             },
-            _computeDurationText:function(from,to){
-              if (to == 'now' && typeof from === 'string' && from.search("/")==-1) {
-                  var digits = parseInt(from.match(/\d+/g));
-                  var unit;
-                  if (from.search("min")) {
-                      unit = "minutes"
-                  } else if (from.search("d")) {
-                      unit = "days"
-                  } else if (from.search("y")) {
-                      unit = "years";
-                  } else if (from.seach("month")) {
-                      unit = "months";
-                  } else if (from.seach("h")) {
-                      unit = "hours";
+            _initTime:function(newValue,oldValue){
+                if(this.innerTo==null || this.innerTo==""){
+                  this.innerTo=this.to;
+                  this.innerFrom=this.from;
+                }
+                if(oldValue==null){
+                  //in case we got timestamps
+                  if (typeof newValue != 'string'){
+                    if(this.from==newValue){
+                      this.from= new Date(newValue);
+                    }
+                    else{
+                      this.to=new Date(newValue);
+                    }
+                  }else{//in case we got relative time
+                    var ret = newValue.replace('now-', '-');
+                    if (ret.search('min') == -1 && ret.search('month')==-1)
+                        ret = ret.replace('m', 'min');
+
+                    if(this.from==newValue){
+                      this.from=ret;
+                    }
+                    else{
+                      this.to=ret;
+                    }
                   }
-                  this.durationText = "Last " + digits + " " + unit;
-              } else {
-                  this.durationText = from + " - " + to;
-              }
+                  if(this.to=='now' && typeof this.from==='string'){
+                    var digits=parseInt(this.from.match(/\d+/g));
+                    var unit;
+                    if(this.from.search("min")){
+                      unit="minutes"
+                    }else if(this.from.search("d")){
+                      unit="days"
+                    }else if(this.from.search("y")){
+                      unit="years";
+                    }else if(this.from.seach("month")){
+                      unit="months";
+                    }else if(this.from.seach("h")){
+                      unit="hours";
+                    }
+                    this.durationText="Last "+digits+" "+unit;
+                  }else{
+                    this.durationText=this.from+ " - " +this.to;
+                  }
+                }
             },
             applyFrom: function() {
                 var dateFrom = this.querySelector('#pickDateFrom'),
