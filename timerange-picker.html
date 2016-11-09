@@ -175,20 +175,8 @@
                 },
                 refreshInterval: {
                     type: Number,
-                    notify: true,
-                    observer: '_stringtoSec'
+                    notify: true
                 }
-            },
-            _stringtoSec:function(){
-              if(typeof this.refreshInterval ==='string'){
-                var digits = parseInt(this.refreshInterval.match(/\d+/g));
-                if(this.refreshInterval.search("min")>-1){
-                  this.refreshInterval=digits*60000;
-                }
-                else if(this.refreshInterval.search("sec")>-1){
-                  this.refreshInterval=digits*1000;
-                }
-              }
             },
             _innerToValue:function(val){
               if(val=='now'){
