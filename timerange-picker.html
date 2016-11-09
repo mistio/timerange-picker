@@ -69,7 +69,7 @@
         }
       </style>
       <paper-icon-button on-tap="minusDuration" icon="icons:chevron-left"></paper-icon-button>
-      <paper-button id="currenttimerange" toggles active="{{mainDialogOpen}}" on-tap="_clearInterval">{{durationText}}</paper-button>
+      <paper-button id="currenttimerange" toggles active="{{mainDialogOpen}}" on-tap="_setInterval">{{durationText}}</paper-button>
       <paper-icon-button id="plusButton" disabled="true" on-tap="plusDuration" icon="icons:chevron-right"></paper-icon-button>
 
       <paper-dialog opened="{{mainDialogOpen}}" id="dialog" modal class="paper-time-picker-dialog">
@@ -201,7 +201,9 @@
                 this.dropdownIntervalSelection = 0;
                 this.refreshInterval = 0;
             },
-
+            _setInterval:function (){
+                this.dropdownIntervalSelection=this.refreshInterval;
+            },
             ready: function() {
                 this.endOfDiff = new Date();
                 this.lastxDate = [{
