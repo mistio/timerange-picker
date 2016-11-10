@@ -191,6 +191,7 @@
             },
             _setInterval:function (){
                 this.dropdownIntervalSelection=this.refreshInterval;
+                this.refreshInterval=0;
             },
             ready: function() {
                 this.endOfDiff = new Date();
@@ -471,7 +472,6 @@
                     this.querySelector('#plusButton').removeAttribute("disabled");
                 }
                 this._computeDurationText(this.innerFrom,this.innerTo);
-                console.log(this.durationText)
             },
 
             attached: function() {
