@@ -414,11 +414,6 @@
                 this.from = Math.floor(start.getTime() / 1000);
             },
 
-            _timestamptoRelative:function(from){
-              var elapsed= Math.floor(new Date().getTime()/1000)-from;
-              console.log(elapsed,from,Math.floor(new Date().getTime()/1000))
-            },
-
             _relativetoTimestamp: function(relative) {
                 var timestamp = relative;
                 var now = Math.floor(new Date().getTime() / 1000);
