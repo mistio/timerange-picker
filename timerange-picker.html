@@ -87,10 +87,10 @@
                 </div>
                 <paper-dropdown-menu id="refreshIntervalMenu" disabled="{{_innerToValue(innerTo)}}" label="auto refresh" placeholder="off">
                   <paper-menu class="dropdown-content" selected="{{dropdownIntervalSelection}}" attr-for-selected="data-value" >
-                    <paper-item data-value="0">off</paper-item>
-                    <paper-item data-value="10000">every 10sec</paper-item>
-                    <paper-item data-value="60000">every 1min</paper-item>
-                    <paper-item data-value="600000">every 10min</paper-item>
+                    <paper-item data-value=0>off</paper-item>
+                    <paper-item data-value=10000>every 10sec</paper-item>
+                    <paper-item data-value=60000>every 1min</paper-item>
+                    <paper-item data-value=600000>every 10min</paper-item>
                   </paper-menu>
                 </paper-dropdown-menu>
             </div>
@@ -192,7 +192,7 @@
             },
             _setInterval:function (){
                 this.dropdownIntervalSelection=this.refreshInterval;
-                this.refreshInterval=0;
+                this.set('refreshInterval',0);
             },
             ready: function() {
                 this.endOfDiff = new Date();
