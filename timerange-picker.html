@@ -105,7 +105,7 @@
           </div>
     <hr/>
     <div class="layout horizontal buttons">
-        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-dismiss on-tap="_resetInterval">Cancel</paper-button>
         <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
     </div>
     </paper-dialog>
@@ -156,6 +156,10 @@
                 innerTo: {
                     type: String
                 },
+                innerRefresh:{
+                  type:Number,
+                  value:0
+                },
                 from: {
                     type: String,
                     notify: true,
@@ -192,7 +196,12 @@
             },
             _setInterval:function (){
                 this.dropdownIntervalSelection=this.refreshInterval;
+                this.innerRefresh=this.refreshInterval;
                 this.set('refreshInterval',0);
+            },
+            _resetInterval:function(){
+              this.dropdownIntervalSelection=this.innerRefresh;
+              this.refreshInterval=this.innerRefresh;
             },
             ready: function() {
                 this.endOfDiff = new Date();
