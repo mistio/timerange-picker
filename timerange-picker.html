@@ -309,11 +309,13 @@
             },
 
             applyTo: function() {
-                console.log("applying to")
                 var dateTo = this.querySelector('#pickDateTo'),
                     timeTo = this.querySelector('#pickTimeTo');
                 this.innerTo = moment(dateTo.date).format('MM/DD/YYYY');
                 this.innerTo += " " + moment(timeTo.time.toString(), "hh:mm A").format('HH:mm');
+                if(this.innerTo!="now" || this.innerTo!=Math.floor(new Date().getTime()/1000)){
+                  this.dropdownIntervalSelection=0;
+                }
             },
 
             computeDuration: function(e) {
