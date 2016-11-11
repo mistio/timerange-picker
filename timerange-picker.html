@@ -358,12 +358,12 @@
               this._clearInterval();
                 var diff, from, to;
                 if (typeof this.from === 'string') {
-                    from = this._relativetoTimestamp(this.from);
+                    from = this._relativetoTimestamp(this.from,"from");
                 } else {
                     from = this.from;
                 }
                 if (typeof this.to === 'string' && this.to != 'now') {
-                    to = this._relativetoTimestamp(this.to);
+                    to = this._relativetoTimestamp(this.to,"to");
                 } else {
                     to = this.to;
                 }
@@ -390,12 +390,12 @@
                 this._clearInterval();
                 var diff, from, to;
                 if (typeof this.from === 'string') {
-                    from = this._relativetoTimestamp(this.from);
+                    from = this._relativetoTimestamp(this.from,"from");
                 } else {
                     from = this.from;
                 }
                 if (typeof this.to === 'string' && this.to != 'now') {
-                    to = this._relativetoTimestamp(this.to);
+                    to = this._relativetoTimestamp(this.to,"to");
                 } else {
                     to = this.to;
                 }
@@ -416,9 +416,18 @@
                 this.from = Math.floor(start.getTime() / 1000);
             },
 
-            _relativetoTimestamp: function(relative) {
+            _relativetoTimestamp: function(relative,who) {
                 var timestamp = relative;
-                var now = Math.floor(new Date().getTime() / 1000);
+                if(who=="to" ||this.innerTo=="now"){
+                    var now = Math.floor(new Date().getTime() / 1000);
+                }else if(who=="from" && this.innerTo!="now"){
+                    if (this.innerTo.search("/") > -1 ) {
+                      var now= Math.floor(new Date(this.innerTo).getTime()/1000);
+                    }else{
+                      var now=this.from;
+                    }
+                }
+
                 if (relative.search("/") == -1 && relative != 'now') {
                     var parsedDigits = parseInt(relative.match(/\d+/g));
                     if (relative.search("y") >= 0) { // time in years
@@ -461,8 +470,8 @@
                     this.from = (df.getTime() / 1000);
 
                 } else {
-                    this.to = this._relativetoTimestamp(this.innerTo);
-                    this.from = this._relativetoTimestamp(this.innerFrom);
+                    this.to = this._relativetoTimestamp(this.innerTo,"to");
+                    this.from = this._relativetoTimestamp(this.innerFrom,"from");
                     console.log(this.to, this.from, "////", this.innerTo, this.innerFrom)
                 }
                 if (this.to + (this.to - this.from) <= Math.floor(new Date().getTime() / 1000)) {
