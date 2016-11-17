@@ -187,6 +187,7 @@
               if(val=='now'){
                 return false;
               }else{
+                this.dropdownIntervalSelection=0;
                 return true;
               }
             },
@@ -434,7 +435,7 @@
                     if (this.innerTo.search("/") > -1 ) {
                       var now= Math.floor(new Date(this.innerTo).getTime()/1000);
                     }else{
-                      var now=this.from;
+                      var now=this.to;
                     }
                 }
 
