@@ -23,7 +23,7 @@
 -->
 
 <dom-module id="timerange-picker">
-  <template>
+    <template>
       <style>
         :host {
           display: flex;
@@ -72,20 +72,19 @@
       <paper-icon-button on-tap="minusDuration" icon="icons:chevron-left"></paper-icon-button>
       <paper-button id="currenttimerange" toggles active="{{mainDialogOpen}}" on-tap="_setInterval">{{durationText}}</paper-button>
       <paper-icon-button id="plusButton" disabled="true" on-tap="plusDuration" icon="icons:chevron-right"></paper-icon-button>
-
       <paper-dialog opened="{{mainDialogOpen}}" id="dialog" modal class="paper-time-picker-dialog">
           <div class="layout horizontal">
             <div id="timerange">
                 <h3>Time Range</h3>
                 <div class="layout horizontal time-input">
-                    <paper-input class="flex" id="from" label="From" value="{{innerFrom}}" on-tap="clearSelectedButton"></paper-input>
+                    <paper-input class="flex" id="from" label="From" value="{{localFrom}}" on-tap="clearSelectedButton"></paper-input>
                     <paper-icon-button class="from" toggles active="{{fromDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
                 </div>
                 <div class="layout horizontal time-input">
-                    <paper-input class="flex" id="to" label="To" value="{{innerTo}}" on-tap="clearSelectedButton"></paper-input>
+                    <paper-input class="flex" id="to" label="To" value="{{localTo}}" on-tap="clearSelectedButton"></paper-input>
                     <paper-icon-button class="to" toggles active="{{toDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
                 </div>
-                <paper-dropdown-menu id="refreshIntervalMenu" disabled="{{_innerToValue(innerTo)}}" label="auto refresh" placeholder="off">
+                <paper-dropdown-menu id="refreshIntervalMenu" disabled$="{{_disableDropdown(localTo)}}" label="auto refresh" placeholder="off">
                   <paper-menu class="dropdown-content" selected="{{dropdownIntervalSelection}}" attr-for-selected="data-value" >
                     <paper-item data-value=0>off</paper-item>
                     <paper-item data-value=10000>every 10sec</paper-item>
@@ -103,36 +102,35 @@
                 </div>
             </div>
           </div>
-    <hr/>
-    <div class="layout horizontal buttons">
-        <paper-button dialog-dismiss on-tap="_resetInterval">Cancel</paper-button>
-        <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
-    </div>
-    </paper-dialog>
-    <paper-dialog id="datetime" opened="{{fromDialogOpen}}">
-        <h2>Select from datetime</h2>
-        <div>
-            <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
-            <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
-        </div>
-        <div class="pick-buttons">
-            <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
-            <paper-button dialog-dismiss>Cancel</paper-button>
-        </div>
-    </paper-dialog>
-    <paper-dialog id="datetime" opened="{{toDialogOpen}}">
-        <h2>Select to datetime</h2>
-        <div>
-            <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
-            <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
-        </div>
-        <div class="pick-buttons">
-            <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
-            <paper-button dialog-dismiss>Cancel</paper-button>
-        </div>
-    </paper-dialog>
-  </template>
-
+          <hr/>
+          <div class="layout horizontal buttons">
+              <paper-button dialog-dismiss on-tap="_resetInterval">Cancel</paper-button>
+              <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
+          </div>
+      </paper-dialog>
+      <paper-dialog id="datetime" opened="{{fromDialogOpen}}">
+          <h2>Select from datetime</h2>
+          <div>
+              <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
+              <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
+          </div>
+          <div class="pick-buttons">
+              <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
+              <paper-button dialog-dismiss>Cancel</paper-button>
+          </div>
+      </paper-dialog>
+      <paper-dialog id="datetime" opened="{{toDialogOpen}}">
+          <h2>Select to datetime</h2>
+          <div>
+              <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
+              <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
+          </div>
+          <div class="pick-buttons">
+              <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
+              <paper-button dialog-dismiss>Cancel</paper-button>
+          </div>
+      </paper-dialog>
+    </template>
     <script>
         Polymer({
             is: 'timerange-picker',
@@ -150,15 +148,17 @@
                 endOfDiff: {
                     type: Date
                 },
-                innerFrom: {
+                //local values are used so as to not trigger any outside-element functions that are trigger from not localized ones.
+                localFrom: {
                     type: String
                 },
-                innerTo: {
-                    type: String
+                localTo: {
+                    type: String,
+                    observer:"_dropdownReset"
                 },
-                innerRefresh:{
-                  type:Number,
-                  value:0
+                localRefresh: {
+                    type: Number,
+                    value: 0
                 },
                 from: {
                     type: String,
@@ -176,33 +176,37 @@
                 },
                 durationText: {
                     type: String,
-                    computed: '_computeDurationText(innerFrom, innerTo)'
+                    computed: '_computeDurationText(localFrom, localTo)'
                 },
                 refreshInterval: {
                     type: Number,
                     notify: true
                 }
             },
-            _innerToValue:function(val){
-              if(val=='now'){
-                return false;
-              }else{
-                this.dropdownIntervalSelection=0;
-                return true;
-              }
+            _dropdownReset:function(localTo){
+                if(this.localTo!="now")
+                  this._clearInterval();
+            },
+            _disableDropdown: function(val) {
+              console.log(val);
+                if (val == 'now') {
+                    return false;
+                } else {
+                    return true;
+                }
             },
             _clearInterval: function() {
                 this.dropdownIntervalSelection = 0;
                 this.refreshInterval = 0;
             },
-            _setInterval:function (){
-                this.dropdownIntervalSelection=this.refreshInterval;
-                this.innerRefresh=this.refreshInterval;
-                this.set('refreshInterval',0);
+            _setInterval: function() {
+                this.dropdownIntervalSelection = this.refreshInterval;
+                this.localRefresh = this.refreshInterval;
+                this.set('refreshInterval', 0);
             },
-            _resetInterval:function(){
-              this.dropdownIntervalSelection=this.innerRefresh;
-              this.refreshInterval=this.innerRefresh;
+            _resetInterval: function() {
+                this.dropdownIntervalSelection = this.localRefresh;
+                this.refreshInterval = this.localRefresh;
             },
             ready: function() {
                 this.endOfDiff = new Date();
@@ -243,92 +247,91 @@
                     text: "Last 1 year"
                 }];
             },
-            _computeDurationText:function(from,to){
-                if (to == 'now' && typeof from === 'string' && from.search("/")==-1) {
+            _computeDurationText: function(from, to) {
+                if (to == 'now' && typeof from === 'string' && from.search("/") == -1) {
                     var digits = parseInt(from.match(/\d+/g));
                     var unit;
-                    if (from.search("min")>-1) {
-                        unit = "minute"+this.numberEnding(digits);
-                    } else if (from.search("d")>-1) {
-                        unit = "day"+this.numberEnding(digits);
-                    } else if (from.search("y")>-1) {
-                        unit = "year"+this.numberEnding(digits);
-                    } else if (from.search("month")>-1) {
-                        unit = "month"+this.numberEnding(digits);
-                    } else if (from.search("h")>-1) {
-                        unit = "hour"+this.numberEnding(digits);
+                    if (from.search("min") > -1) {
+                        unit = "minute" + this.numberEnding(digits);
+                    } else if (from.search("d") > -1) {
+                        unit = "day" + this.numberEnding(digits);
+                    } else if (from.search("y") > -1) {
+                        unit = "year" + this.numberEnding(digits);
+                    } else if (from.search("month") > -1) {
+                        unit = "month" + this.numberEnding(digits);
+                    } else if (from.search("h") > -1) {
+                        unit = "hour" + this.numberEnding(digits);
                     }
                     return "Last " + digits + " " + unit;
-                } else if(to=='now' && from.search("/")>-1){
-                  var seconds=Math.floor(new Date().getTime()/1000) -Math.floor(new Date(from).getTime()/1000);
-                  var numyears = Math.floor(seconds / 31536000);
-                  var numdays = Math.floor((seconds % 31536000) / 86400);
-                  var numhours = Math.floor(((seconds % 31536000) % 86400) / 3600);
-                  var numminutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
-                  var numseconds = (((seconds % 31536000) % 86400) % 3600) % 60;
-                  var text="";
-                  if(numyears>0){
-                    text+=numyears + " year"+this.numberEnding(numyears);
-                  }
-                  if(numdays>0){
-                    text+=numdays + " day"+this.numberEnding(numdays);
-                  }
-                  if(numhours>0){
-                    text+=numhours + " hour"+this.numberEnding(numhours);
-                  }
-                  if(numminutes>0){
-                    text+=numminutes + " minute"+this.numberEnding(numminutes);
-                  }
-                  return "Last "+text;
-                }else{
-                  return from + " - " + to;
+                } else if (to == 'now' && from.search("/") > -1) {
+                    var seconds = Math.floor(new Date().getTime() / 1000) - Math.floor(new Date(from).getTime() / 1000);
+                    var numyears = Math.floor(seconds / 31536000);
+                    var numdays = Math.floor((seconds % 31536000) / 86400);
+                    var numhours = Math.floor(((seconds % 31536000) % 86400) / 3600);
+                    var numminutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
+                    var numseconds = (((seconds % 31536000) % 86400) % 3600) % 60;
+                    var text = "";
+                    //we have to check which value we are going to display in order to calc the ending "s"
+                    if (numyears > 0) {
+                        text += numyears + " year" + this.numberEnding(numyears);
+                    }
+                    if (numdays > 0) {
+                        text += numdays + " day" + this.numberEnding(numdays);
+                    }
+                    if (numhours > 0) {
+                        text += numhours + " hour" + this.numberEnding(numhours);
+                    }
+                    if (numminutes > 0) {
+                        text += numminutes + " minute" + this.numberEnding(numminutes);
+                    }
+                    return "Last " + text;
+                } else {
+                    return from + " - " + to;
                 }
             },
-            numberEnding:function (number) {
+            numberEnding: function(number) {
                 return (number > 1) ? 's' : '';
             },
-            _initTime:function(newValue,oldValue){
-                if(this.innerTo==null || this.innerTo==""){
-                  this.innerTo=this.to;
-                  this.innerFrom=this.from;
+            _initTime: function(newValue, oldValue) {
+                if (this.localTo == null || this.localTo == "") {
+                    this.localTo = this.to;
+                    this.localFrom = this.from;
                 }
-                if(oldValue==null){
-                  //in case we got timestamps
-                  if (typeof newValue != 'string'){
-                    if(this.from==newValue){
-                      this.from= new Date(newValue);
-                    }
-                    else{
-                      this.to=new Date(newValue);
-                    }
-                  }else{//in case we got relative time
-                    var ret = newValue.replace('now-', '-');
-                    if (ret.search('min') == -1 && ret.search('month')==-1)
-                        ret = ret.replace('m', 'min');
+                if (oldValue == null) {
+                    //in case we got timestamps
+                    if (typeof newValue != 'string') {
+                        if (this.from == newValue) {
+                            this.from = new Date(newValue);
+                        } else {
+                            this.to = new Date(newValue);
+                        }
+                    } else { //in case we got relative time
+                        var ret = newValue.replace('now-', '-');
+                        if (ret.search('min') == -1 && ret.search('month') == -1)
+                            ret = ret.replace('m', 'min');
 
-                    if(this.from==newValue){
-                      this.from=ret;
+                        if (this.from == newValue) {
+                            this.from = ret;
+                        } else {
+                            this.to = ret;
+                        }
                     }
-                    else{
-                      this.to=ret;
-                    }
-                  }
                 }
             },
             applyFrom: function() {
                 var dateFrom = this.querySelector('#pickDateFrom'),
                     timeFrom = this.querySelector('#pickTimeFrom');
-                this.innerFrom = moment(dateFrom.date).format('MM/DD/YYYY');
-                this.innerFrom += " " + moment(timeFrom.time.toString(), "hh:mm A").format('HH:mm');
+                this.localFrom = moment(dateFrom.date).format('MM/DD/YYYY');
+                this.localFrom += " " + moment(timeFrom.time.toString(), "hh:mm A").format('HH:mm');
             },
 
             applyTo: function() {
                 var dateTo = this.querySelector('#pickDateTo'),
                     timeTo = this.querySelector('#pickTimeTo');
-                this.innerTo = moment(dateTo.date).format('MM/DD/YYYY');
-                this.innerTo += " " + moment(timeTo.time.toString(), "hh:mm A").format('HH:mm');
-                if(this.innerTo!="now" || this.innerTo!=Math.floor(new Date().getTime()/1000)){
-                  this.dropdownIntervalSelection=0;
+                this.localTo = moment(dateTo.date).format('MM/DD/YYYY');
+                this.localTo += " " + moment(timeTo.time.toString(), "hh:mm A").format('HH:mm');
+                if (this.localTo != "now" || this.localTo != Math.floor(new Date().getTime() / 1000)) {
+                    this.dropdownIntervalSelection = 0;
                 }
             },
 
@@ -346,42 +349,42 @@
                 var newDate = new Date();
                 switch (val) {
                     case "days":
-                        this.innerFrom = -from + "d";
+                        this.localFrom = -from + "d";
                         this.diff = from * 86400000;
                         break;
                     case "hour":
                     case "hours":
-                        this.innerFrom = -from + "h";
+                        this.localFrom = -from + "h";
                         this.diff = from * 3600000;
                         break;
                     case "year":
-                        this.innerFrom = -from + "y";
+                        this.localFrom = -from + "y";
                         this.diff = from * 31556952000;
                         break;
                     case "minutes":
-                        this.innerFrom = -from + "min";
+                        this.localFrom = -from + "min";
                         this.diff = from * 60000;
                         break;
                 }
-                                console.log(this.innerFrom);
-                this.innerTo = "now";
+                console.log(this.localFrom);
+                this.localTo = "now";
                 this.querySelector('#plusButton').setAttribute("disabled", "true");
             },
 
             minusDuration: function() {
-              this._clearInterval();
+                this._clearInterval();
                 var diff, from, to;
                 if (typeof this.from === 'string') {
-                    from = this._relativetoTimestamp(this.from,"from");
+                    from = this._relativetoTimestamp(this.from, "from");
                 } else {
                     from = this.from;
                 }
                 if (typeof this.to === 'string' && this.to != 'now') {
-                    to = this._relativetoTimestamp(this.to,"to");
+                    to = this._relativetoTimestamp(this.to, "to");
                 } else {
                     to = this.to;
                 }
-                if (this.innerTo == "now" || this.to == "now") {
+                if (this.localTo == "now" || this.to == "now") {
                     diff = this.diff;
                     to = Math.floor(new Date().getTime() / 1000);
                     from = to - this.diff / 1000;
@@ -392,24 +395,24 @@
                 this.querySelector('#plusButton').removeAttribute("disabled");
                 var start = new Date((from * 1000) - diff);
                 var end = new Date((to * 1000) - diff);
-                this.innerTo = moment(end).format('MM/DD/YYYY HH:mm');
-                this.innerFrom = moment(start).format('MM/DD/YYYY HH:mm');
+                this.localTo = moment(end).format('MM/DD/YYYY HH:mm');
+                this.localFrom = moment(start).format('MM/DD/YYYY HH:mm');
                 this.to = Math.floor(end.getTime() / 1000);
                 this.from = Math.floor(start.getTime() / 1000);
-                console.log(this.innerFrom,this.innerTo)
-                this._computeDurationText(this.innerFrom,this.innerTo);
+                console.log(this.localFrom, this.localTo)
             },
 
             plusDuration: function() {
                 this._clearInterval();
                 var diff, from, to;
                 if (typeof this.from === 'string') {
-                    from = this._relativetoTimestamp(this.from,"from");
+                  //we need to calculate the timestamp in case e.g from=-2d and to=1d and he hits plus duration
+                    from = this._relativetoTimestamp(this.from, "from");
                 } else {
                     from = this.from;
                 }
                 if (typeof this.to === 'string' && this.to != 'now') {
-                    to = this._relativetoTimestamp(this.to,"to");
+                    to = this._relativetoTimestamp(this.to, "to");
                 } else {
                     to = this.to;
                 }
@@ -420,28 +423,29 @@
                 if (new Date((to * 1000 + diff * 2)) >= new Date()) {
                     this.querySelector('#plusButton').setAttribute("disabled", "true");
                     this.to = "now"
-                    this.innerTo = "now"
+                    this.localTo = "now"
                 } else {
-                    this.innerTo = moment(end).format('MM/DD/YYYY HH:mm');
+                    this.localTo = moment(end).format('MM/DD/YYYY HH:mm');
                 }
-                this.innerFrom = moment(start).format('MM/DD/YYYY HH:mm');
-                this._computeDurationText(this.innerFrom,this.innerTo);
+                this.localFrom = moment(start).format('MM/DD/YYYY HH:mm');
                 this.to = Math.floor(end.getTime() / 1000);
                 this.from = Math.floor(start.getTime() / 1000);
             },
 
-            _relativetoTimestamp: function(relative,who) {
+            _relativetoTimestamp: function(relative, who) {
                 var timestamp = relative;
-                if(who=="to" ||this.innerTo=="now"){
+                //we need to calculate what timestamp is "now" so we can calculate later the diff so that we can add/subtract it to move in time
+                if (who == "to" || this.localTo == "now" ||(typeof relative==='string' && relative.search("/")==-1)) {
                     var now = Math.floor(new Date().getTime() / 1000);
-                }else if(who=="from" && this.innerTo!="now"){
-                    if (this.innerTo.search("/") > -1 ) {
-                      var now= Math.floor(new Date(this.innerTo).getTime()/1000);
-                    }else{
-                      var now=this.to;
+                }
+                else if (who == "from" && this.localTo != "now") {
+                    if (this.localTo.search("/") > -1) {
+                        var now = Math.floor(new Date(this.localTo).getTime() / 1000);
+                    } else {
+                        var now = this.to;
                     }
                 }
-
+                // in case we have xdays,xmin etc
                 if (relative.search("/") == -1 && relative != 'now') {
                     var parsedDigits = parseInt(relative.match(/\d+/g));
                     if (relative.search("y") >= 0) { // time in years
@@ -457,9 +461,11 @@
                     } else { // time in secs
                         timestamp = now - parsedDigits;
                     }
+                //in case we have xx/xx/xxxx format
                 } else if (relative != 'now') {
                     timestamp = Math.floor(new Date(relative).getTime() / 1000);
                 }
+                //in all other occusions if any we have set timestamp=relative in the beginning
                 return timestamp;
             },
 
@@ -477,21 +483,20 @@
                 var selEl = this.querySelector('.range-button[selected="true"]');
                 this.refreshInterval = this.dropdownIntervalSelection;
                 var diff, from, to;
-                if (typeof this.innerTo === "number") {
-                    var df = new Date(this.innerFrom);
-                    var dt = new Date(this.innerTo);
+                if (typeof this.localTo === "number") {
+                    var df = new Date(this.localFrom);
+                    var dt = new Date(this.localTo);
                     this.to = dt.getTime() / 1000;
                     this.from = (df.getTime() / 1000);
 
                 } else {
-                    this.to = this._relativetoTimestamp(this.innerTo,"to");
-                    this.from = this._relativetoTimestamp(this.innerFrom,"from");
-                    console.log(this.to, this.from, "////", this.innerTo, this.innerFrom)
+                    this.to = this._relativetoTimestamp(this.localTo, "to");
+                    this.from = this._relativetoTimestamp(this.localFrom, "from");
+                    console.log(this.to, this.from, "////", this.localTo, this.localFrom)
                 }
                 if (this.to + (this.to - this.from) <= Math.floor(new Date().getTime() / 1000)) {
                     this.querySelector('#plusButton').removeAttribute("disabled");
                 }
-                this._computeDurationText(this.innerFrom,this.innerTo);
             },
 
             attached: function() {
