@@ -248,15 +248,15 @@
                     var digits = parseInt(from.match(/\d+/g));
                     var unit;
                     if (from.search("min")>-1) {
-                        unit = "minutes"
+                        unit = "minute"+this.numberEnding(digits);
                     } else if (from.search("d")>-1) {
-                        unit = "days"
+                        unit = "day"+this.numberEnding(digits);
                     } else if (from.search("y")>-1) {
-                        unit = "years";
+                        unit = "year"+this.numberEnding(digits);
                     } else if (from.search("month")>-1) {
-                        unit = "months";
+                        unit = "month"+this.numberEnding(digits);
                     } else if (from.search("h")>-1) {
-                        unit = "hours";
+                        unit = "hour"+this.numberEnding(digits);
                     }
                     return "Last " + digits + " " + unit;
                 } else if(to=='now' && from.search("/")>-1){
@@ -268,21 +268,24 @@
                   var numseconds = (((seconds % 31536000) % 86400) % 3600) % 60;
                   var text="";
                   if(numyears>0){
-                    text+=numyears + " years ";
+                    text+=numyears + " year"+this.numberEnding(numyears);
                   }
                   if(numdays>0){
-                    text+=numdays + " days ";
+                    text+=numdays + " day"+this.numberEnding(numdays);
                   }
                   if(numhours>0){
-                    text+=numhours + " hours "
+                    text+=numhours + " hour"+this.numberEnding(numhours);
                   }
                   if(numminutes>0){
-                    text+=numminutes + " minutes ";
+                    text+=numminutes + " minute"+this.numberEnding(numminutes);
                   }
                   return "Last "+text;
                 }else{
                   return from + " - " + to;
                 }
+            },
+            numberEnding:function (number) {
+                return (number > 1) ? 's' : '';
             },
             _initTime:function(newValue,oldValue){
                 if(this.innerTo==null || this.innerTo==""){
