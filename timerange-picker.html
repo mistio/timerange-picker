@@ -29,6 +29,7 @@
           display: flex;
           box-sizing: border-box;
           align-items: center;
+          justify-content: center 
         }
         paper-button#currenttimerange {
           background-color: #eee;
@@ -67,6 +68,9 @@
           font-size: 14px;
           min-height: auto;
           cursor: pointer;
+        }
+        paper-icon-button, paper-icon-button {
+            display: block;
         }
       </style>
       <paper-icon-button on-tap="minusDuration" icon="icons:chevron-left"></paper-icon-button>
