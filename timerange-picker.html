@@ -90,7 +90,7 @@
                     <paper-input class="flex" id="to" label="To" value="{{localTo}}" on-tap="clearSelectedButton"></paper-input>
                     <paper-icon-button class="to" toggles active="{{toDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
                 </div>
-                <paper-dropdown-menu id="refreshIntervalMenu" disabled$="{{_disableDropdown(localTo)}}" label="auto refresh" placeholder="off">
+                <paper-dropdown-menu id="refreshIntervalMenu" disabled$="{{_disableDropdown(localTo)}}" label="refresh" placeholder="off">
                   <paper-menu class="dropdown-content" selected="{{dropdownIntervalSelection}}" attr-for-selected="data-value" >
                     <paper-item data-value=0>off</paper-item>
                     <paper-item data-value=10000>every 10sec</paper-item>
@@ -216,40 +216,41 @@
             ready: function() {
                 this.endOfDiff = new Date();
                 this.lastxDate = [{
-                    from: 5,
+                    from: 10,
                     to: "now",
                     type: "minutes",
-                    text: "Last 5 minutes"
-                }, {
-                    from: 30,
-                    to: "now",
-                    type: "minutes",
-                    text: "Last 30 minutes"
+                    text: "Last 10 minutes",
+                    refreshInterval: 10000
                 }, {
                     from: 1,
                     to: "now",
                     type: "hour",
-                    text: "Last 1 hour"
+                    text: "Last 1 hour",
+                    refreshInterval: 60000
                 }, {
                     from: 3,
                     to: "now",
                     type: "hours",
-                    text: "Last 3 hours"
+                    text: "Last 6 hours",
+                    refreshInterval: 600000
                 }, {
                     from: 7,
                     to: "now",
                     type: "days",
-                    text: "Last 7 days"
+                    text: "Last 7 days",
+                    refreshInterval: 600000
                 }, {
                     from: 30,
                     to: "now",
                     type: "days",
-                    text: "Last 30 days"
+                    text: "Last 30 days",
+                    refreshInterval: 600000
                 }, {
                     from: 1,
                     to: "now",
                     type: "year",
-                    text: "Last 1 year"
+                    text: "Last 1 year",
+                    refreshInterval: 600000
                 }];
             },
             _computeDurationText: function(from, to) {
@@ -347,9 +348,9 @@
                 if (prevEl)
                     prevEl.setAttribute("selected", false);
                 el.setAttribute("selected", true);
-                var from = el.attributes.from.value;
-                var to = el.attributes.to.value;
-                var val = el.attributes.type.value;
+                var from = e.model.item.from;
+                var to = e.model.item.to;
+                var val = e.model.item.type;
 
                 var newDate = new Date();
                 switch (val) {
@@ -371,6 +372,7 @@
                         this.diff = from * 60000;
                         break;
                 }
+                this.dropdownIntervalSelection = e.model.item.refreshInterval;
                 console.log(this.localFrom);
                 this.localTo = "now";
                 this.querySelector('#plusButton').setAttribute("disabled", "true");
