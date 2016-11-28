@@ -33,77 +33,77 @@
                 justify-content: center;
                 margin-bottom: 4px;
             }
-            
+
             paper-button#currenttimerange {
                 background-color: #eee;
                 text-transform: none;
             }
-            
+
             paper-icon-button {
                 padding: 0.7em 0.57em;
             }
-            
+
             paper-icon-button[disabled] {
                 opacity: 0.32;
             }
-            
+
             .time-input paper-icon-button {
                 align-self: flex-end;
             }
-            
+
             .time-input {
                 vertical-align: baseline;
             }
-            
+
             .buttons {
                 justify-content: flex-end;
             }
-            
+
             #timerange {
                 margin-right: 16px;
             }
-            
+
             #quickrange {
                 margin: 0 16px 32px 16px;
             }
-            
+
             paper-dialog h3 {
                 margin-top: 0;
                 margin-bottom: 0;
             }
-            
+
             hr {
                 margin: 0;
             }
-            
+
             paper-item {
                 padding: 4px;
                 font-size: 14px;
                 min-height: auto;
                 cursor: pointer;
             }
-            
+
             paper-icon-button,
             paper-icon-button {
                 display: block;
             }
         </style>
         <paper-icon-button on-tap="minusDuration" icon="icons:chevron-left"></paper-icon-button>
-        <paper-button id="currenttimerange" toggles active="{{mainDialogOpen}}" on-tap="_setInterval">{{durationText}}</paper-button>
+        <paper-button id="currenttimerange" toggles active="{{isMainDialogOpen}}" on-tap="_setInterval">{{durationText}}</paper-button>
         <paper-icon-button id="plusButton" disabled="true" on-tap="plusDuration" icon="icons:chevron-right"></paper-icon-button>
-        <paper-dialog opened="{{mainDialogOpen}}" id="dialog" modal class="paper-time-picker-dialog">
+        <paper-dialog opened="{{isMainDialogOpen}}" id="dialog" modal class="paper-time-picker-dialog">
             <div class="layout horizontal">
                 <div id="timerange">
                     <h3>Time Range</h3>
                     <div class="layout horizontal time-input">
                         <paper-input class="flex" id="from" label="From" value="{{localFrom}}" on-tap="clearSelectedButton"></paper-input>
-                        <paper-icon-button class="from" toggles active="{{fromDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
+                        <paper-icon-button class="from" toggles active="{{isFromDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
                     </div>
                     <div class="layout horizontal time-input">
                         <paper-input class="flex" id="to" label="To" value="{{localTo}}" on-tap="clearSelectedButton"></paper-input>
-                        <paper-icon-button class="to" toggles active="{{toDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
+                        <paper-icon-button class="to" toggles active="{{isToDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
                     </div>
-                    <paper-dropdown-menu id="refreshIntervalMenu" disabled$="{{_disableDropdown(localTo)}}" label="refresh" placeholder="off">
+                    <paper-dropdown-menu id="refreshIntervalMenu" disabled$="{{_isRefreshAllowed(localTo)}}" label="refresh" placeholder="off">
                         <paper-menu class="dropdown-content" selected="{{dropdownIntervalSelection}}" attr-for-selected="data-value">
                             <paper-item data-value=0>off</paper-item>
                             <paper-item data-value=10000>every 10sec</paper-item>
@@ -115,8 +115,8 @@
                 <div id="quickrange">
                     <h3>Quick Ranges</h3>
                     <div id="listbox" role="listbox">
-                        <template is="dom-repeat" items="[[lastxDate]]" as="item">
-                            <paper-item id="range" class$="range-button" from$="[[item.from]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeDuration">[[item.text]]</paper-item>
+                        <template is="dom-repeat" items="[[quickRanges]]" as="item">
+                            <paper-item id="range" class$="range-button" from$="[[item.from]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="selectQuickRange">[[item.text]]</paper-item>
                         </template>
                     </div>
                 </div>
@@ -127,7 +127,7 @@
                 <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
             </div>
         </paper-dialog>
-        <paper-dialog id="datetime" opened="{{fromDialogOpen}}">
+        <paper-dialog id="datetime" opened="{{isFromDialogOpen}}">
             <h2>Select from datetime</h2>
             <div>
                 <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
@@ -138,7 +138,7 @@
                 <paper-button dialog-dismiss>Cancel</paper-button>
             </div>
         </paper-dialog>
-        <paper-dialog id="datetime" opened="{{toDialogOpen}}">
+        <paper-dialog id="datetime" opened="{{isToDialogOpen}}">
             <h2>Select to datetime</h2>
             <div>
                 <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
@@ -155,11 +155,10 @@
             is: 'timerange-picker',
 
             properties: {
-                mainDialogOpen: Boolean,
-                fromDialogOpen: Boolean,
-                toDialogOpen: Boolean,
-                onApply: Boolean,
-                lastxDate: Array,
+                isMainDialogOpen: Boolean,
+                isFromDialogOpen: Boolean,
+                isToDialogOpen: Boolean,
+                quickRanges: Array,
                 diff: {
                     type: Number,
                     value: 600000
@@ -173,7 +172,6 @@
                 },
                 localTo: {
                     type: String,
-                    observer: "_dropdownReset"
                 },
                 localRefresh: {
                     type: Number,
@@ -189,10 +187,6 @@
                     notify: true,
                     observer: '_initTime'
                 },
-                timeSpan: {
-                    type: Number,
-                    notify: true
-                },
                 durationText: {
                     type: String,
                     computed: '_computeDurationText(localFrom, localTo)'
@@ -202,11 +196,7 @@
                     notify: true
                 }
             },
-            _dropdownReset: function(localTo) {
-                if (this.localTo != "now")
-                    this._clearInterval();
-            },
-            _disableDropdown: function(val) {
+            _isRefreshAllowed: function(val) {
                 if (val == 'now') {
                     return false;
                 } else {
@@ -228,7 +218,7 @@
             },
             ready: function() {
                 this.endOfDiff = new Date();
-                this.lastxDate = [{
+                this.quickRanges = [{
                     from: 10,
                     to: "now",
                     type: "minutes",
@@ -354,8 +344,8 @@
                 }
             },
 
-            computeDuration: function(e) {
-                var el = e.srcElement;
+            selectQuickRange: function(e) {
+                var el = e.target;
                 var diff = 0;
                 var prevEl = this.querySelector('.range-button[selected="true"]');
                 if (prevEl)
