@@ -25,117 +25,130 @@
 
 <dom-module id="timerange-picker">
     <template>
-      <style>
-        :host {
-          display: flex;
-          box-sizing: border-box;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 4px;
-        }
-        paper-button#currenttimerange {
-          background-color: #eee;
-          text-transform: none;
-        }
-        paper-icon-button {
-          padding: 0.7em 0.57em;
-        }
-        paper-icon-button[disabled] {
-          opacity: 0.32;
-        }
-        .time-input paper-icon-button {
-          align-self: flex-end;
-        }
-        .time-input {
-          vertical-align: baseline;
-        }
-        .buttons {
-          justify-content: flex-end;
-        }
-        #timerange {
-          margin-right: 16px;
-        }
-        #quickrange {
-          margin: 0 16px 32px 16px;
-        }
-        paper-dialog h3 {
-          margin-top: 0;
-          margin-bottom: 0;
-        }
-        hr {
-          margin: 0;
-        }
-        paper-item {
-          padding: 4px;
-          font-size: 14px;
-          min-height: auto;
-          cursor: pointer;
-        }
-        paper-icon-button, paper-icon-button {
-            display: block;
-        }
-      </style>
-      <paper-icon-button on-tap="minusDuration" icon="icons:chevron-left"></paper-icon-button>
-      <paper-button id="currenttimerange" toggles active="{{mainDialogOpen}}" on-tap="_setInterval">{{durationText}}</paper-button>
-      <paper-icon-button id="plusButton" disabled="true" on-tap="plusDuration" icon="icons:chevron-right"></paper-icon-button>
-      <paper-dialog opened="{{mainDialogOpen}}" id="dialog" modal class="paper-time-picker-dialog">
-          <div class="layout horizontal">
-            <div id="timerange">
-                <h3>Time Range</h3>
-                <div class="layout horizontal time-input">
-                    <paper-input class="flex" id="from" label="From" value="{{localFrom}}" on-tap="clearSelectedButton"></paper-input>
-                    <paper-icon-button class="from" toggles active="{{fromDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
+        <style>
+             :host {
+                display: flex;
+                box-sizing: border-box;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 4px;
+            }
+            
+            paper-button#currenttimerange {
+                background-color: #eee;
+                text-transform: none;
+            }
+            
+            paper-icon-button {
+                padding: 0.7em 0.57em;
+            }
+            
+            paper-icon-button[disabled] {
+                opacity: 0.32;
+            }
+            
+            .time-input paper-icon-button {
+                align-self: flex-end;
+            }
+            
+            .time-input {
+                vertical-align: baseline;
+            }
+            
+            .buttons {
+                justify-content: flex-end;
+            }
+            
+            #timerange {
+                margin-right: 16px;
+            }
+            
+            #quickrange {
+                margin: 0 16px 32px 16px;
+            }
+            
+            paper-dialog h3 {
+                margin-top: 0;
+                margin-bottom: 0;
+            }
+            
+            hr {
+                margin: 0;
+            }
+            
+            paper-item {
+                padding: 4px;
+                font-size: 14px;
+                min-height: auto;
+                cursor: pointer;
+            }
+            
+            paper-icon-button,
+            paper-icon-button {
+                display: block;
+            }
+        </style>
+        <paper-icon-button on-tap="minusDuration" icon="icons:chevron-left"></paper-icon-button>
+        <paper-button id="currenttimerange" toggles active="{{mainDialogOpen}}" on-tap="_setInterval">{{durationText}}</paper-button>
+        <paper-icon-button id="plusButton" disabled="true" on-tap="plusDuration" icon="icons:chevron-right"></paper-icon-button>
+        <paper-dialog opened="{{mainDialogOpen}}" id="dialog" modal class="paper-time-picker-dialog">
+            <div class="layout horizontal">
+                <div id="timerange">
+                    <h3>Time Range</h3>
+                    <div class="layout horizontal time-input">
+                        <paper-input class="flex" id="from" label="From" value="{{localFrom}}" on-tap="clearSelectedButton"></paper-input>
+                        <paper-icon-button class="from" toggles active="{{fromDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
+                    </div>
+                    <div class="layout horizontal time-input">
+                        <paper-input class="flex" id="to" label="To" value="{{localTo}}" on-tap="clearSelectedButton"></paper-input>
+                        <paper-icon-button class="to" toggles active="{{toDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
+                    </div>
+                    <paper-dropdown-menu id="refreshIntervalMenu" disabled$="{{_disableDropdown(localTo)}}" label="refresh" placeholder="off">
+                        <paper-menu class="dropdown-content" selected="{{dropdownIntervalSelection}}" attr-for-selected="data-value">
+                            <paper-item data-value=0>off</paper-item>
+                            <paper-item data-value=10000>every 10sec</paper-item>
+                            <paper-item data-value=60000>every 1min</paper-item>
+                            <paper-item data-value=600000>every 10min</paper-item>
+                        </paper-menu>
+                    </paper-dropdown-menu>
                 </div>
-                <div class="layout horizontal time-input">
-                    <paper-input class="flex" id="to" label="To" value="{{localTo}}" on-tap="clearSelectedButton"></paper-input>
-                    <paper-icon-button class="to" toggles active="{{toDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
+                <div id="quickrange">
+                    <h3>Quick Ranges</h3>
+                    <div id="listbox" role="listbox">
+                        <template is="dom-repeat" items="[[lastxDate]]" as="item">
+                            <paper-item id="range" class$="range-button" from$="[[item.from]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeDuration">[[item.text]]</paper-item>
+                        </template>
+                    </div>
                 </div>
-                <paper-dropdown-menu id="refreshIntervalMenu" disabled$="{{_disableDropdown(localTo)}}" label="refresh" placeholder="off">
-                  <paper-menu class="dropdown-content" selected="{{dropdownIntervalSelection}}" attr-for-selected="data-value" >
-                    <paper-item data-value=0>off</paper-item>
-                    <paper-item data-value=10000>every 10sec</paper-item>
-                    <paper-item data-value=60000>every 1min</paper-item>
-                    <paper-item data-value=600000>every 10min</paper-item>
-                  </paper-menu>
-                </paper-dropdown-menu>
             </div>
-            <div id="quickrange">
-                <h3>Quick Ranges</h3>
-                <div id="listbox" role="listbox">
-                    <template is="dom-repeat" items="[[lastxDate]]" as="item">
-                        <paper-item id="range" class$="range-button" from$="[[item.from]]" to$="[[item.to]]" type$="[[item.type]]" on-tap="computeDuration">[[item.text]]</paper-item>
-                    </template>
-                </div>
+            <hr/>
+            <div class="layout horizontal buttons">
+                <paper-button dialog-dismiss on-tap="_resetInterval">Cancel</paper-button>
+                <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
             </div>
-          </div>
-          <hr/>
-          <div class="layout horizontal buttons">
-              <paper-button dialog-dismiss on-tap="_resetInterval">Cancel</paper-button>
-              <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
-          </div>
-      </paper-dialog>
-      <paper-dialog id="datetime" opened="{{fromDialogOpen}}">
-          <h2>Select from datetime</h2>
-          <div>
-              <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
-              <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
-          </div>
-          <div class="pick-buttons">
-              <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
-              <paper-button dialog-dismiss>Cancel</paper-button>
-          </div>
-      </paper-dialog>
-      <paper-dialog id="datetime" opened="{{toDialogOpen}}">
-          <h2>Select to datetime</h2>
-          <div>
-              <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
-              <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
-          </div>
-          <div class="pick-buttons">
-              <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
-              <paper-button dialog-dismiss>Cancel</paper-button>
-          </div>
-      </paper-dialog>
+        </paper-dialog>
+        <paper-dialog id="datetime" opened="{{fromDialogOpen}}">
+            <h2>Select from datetime</h2>
+            <div>
+                <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
+                <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
+            </div>
+            <div class="pick-buttons">
+                <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
+                <paper-button dialog-dismiss>Cancel</paper-button>
+            </div>
+        </paper-dialog>
+        <paper-dialog id="datetime" opened="{{toDialogOpen}}">
+            <h2>Select to datetime</h2>
+            <div>
+                <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
+                <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
+            </div>
+            <div class="pick-buttons">
+                <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
+                <paper-button dialog-dismiss>Cancel</paper-button>
+            </div>
+        </paper-dialog>
     </template>
     <script>
         Polymer({
@@ -160,7 +173,7 @@
                 },
                 localTo: {
                     type: String,
-                    observer:"_dropdownReset"
+                    observer: "_dropdownReset"
                 },
                 localRefresh: {
                     type: Number,
@@ -189,9 +202,9 @@
                     notify: true
                 }
             },
-            _dropdownReset:function(localTo){
-                if(this.localTo!="now")
-                  this._clearInterval();
+            _dropdownReset: function(localTo) {
+                if (this.localTo != "now")
+                    this._clearInterval();
             },
             _disableDropdown: function(val) {
                 if (val == 'now') {
@@ -413,7 +426,7 @@
                 this._clearInterval();
                 var diff, from, to;
                 if (typeof this.from === 'string') {
-                  //we need to calculate the timestamp in case e.g from=-2d and to=1d and he hits plus duration
+                    //we need to calculate the timestamp in case e.g from=-2d and to=1d and he hits plus duration
                     from = this._relativetoTimestamp(this.from, "from");
                 } else {
                     from = this.from;
@@ -442,10 +455,9 @@
             _relativetoTimestamp: function(relative, who) {
                 var timestamp = relative;
                 //we need to calculate what timestamp is "now" so we can calculate later the diff so that we can add/subtract it to move in time
-                if (who == "to" || this.localTo == "now" ||(typeof relative==='string' && relative.search("/")==-1)) {
+                if (who == "to" || this.localTo == "now" || (typeof relative === 'string' && relative.search("/") == -1)) {
                     var now = Math.floor(new Date().getTime() / 1000);
-                }
-                else if (who == "from" && this.localTo != "now") {
+                } else if (who == "from" && this.localTo != "now") {
                     if (this.localTo.search("/") > -1) {
                         var now = Math.floor(new Date(this.localTo).getTime() / 1000);
                     } else {
@@ -468,7 +480,7 @@
                     } else { // time in secs
                         timestamp = now - parsedDigits;
                     }
-                //in case we have xx/xx/xxxx format
+                    //in case we have xx/xx/xxxx format
                 } else if (relative != 'now') {
                     timestamp = Math.floor(new Date(relative).getTime() / 1000);
                 }
