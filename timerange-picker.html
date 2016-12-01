@@ -168,14 +168,6 @@
                     value: '',
                     observer: '_toUpdated'
                 },
-                momentFrom: {
-                    type: Object,
-                    computed: '_computeMomentFrom(from)'
-                },
-                momentTo: {
-                    type: Object,
-                    computed: '_computeMomentTo(to)'
-                },
                 refreshInterval: {
                     type: Number,
                     notify: true,
@@ -183,7 +175,7 @@
                     observer: '_refreshIntervalUpdated'
                 },
                 selectedFrom: {
-                    type: String
+                    type: String,
                 },
                 selectedTo: {
                     type: String,
@@ -198,7 +190,7 @@
                 },
                 timeRangeDurationInMinutes: {
                     type: Number,
-                    computed: '_computetimeRangeDurationInMinutes(momentFrom, momentTo)'
+                    computed: '_computetimeRangeDurationInMinutes(from, to)'
                 },
                 isMainDialogOpen: Boolean,
                 isFromDialogOpen: Boolean,
@@ -267,7 +259,7 @@
             },
 
             _isRefreshAllowed: function(selectedTo) {
-                if (!selectedTo || selectedTo.indexOf('now') == -1) {
+                if (!selectedTo || (typeof selectedTo == "string" && selectedTo.indexOf('now') == -1)) {
                     return false;
                 } else {
                     return true;
@@ -275,22 +267,23 @@
             },
 
             _isFwdAllowed: function(to) {
-                if (to && to.startsWith("now"))
+                if (typeof to == "string" && to.startsWith("now"))
                     return false;
                 return true;
             },
 
-            _clearRefreshInterval: function() {
-                this.selectedRefreshInterval = 0;
-                this.refreshInterval = 0;
-            },
-
             _fromUpdated: function() {
-                this.selectedFrom = this.from;
+                if (typeof this.from == 'string' && (this.from.trim().startsWith('now') || this.from.trim().startsWith('-'))) {
+                    this.selectedFrom = this.from;
+                } else
+                    this.selectedFrom = this._computeMoment(this.from).format('MM/DD/YYYY HH:mm');
             },
 
             _toUpdated: function() {
-                this.selectedTo = this.to;
+                if (typeof this.to == 'string' && (this.to.trim().startsWith('now') || this.to.trim().startsWith('-'))) {
+                    this.selectedTo = this.to;
+                } else
+                    this.selectedTo = this._computeMoment(this.to).format('MM/DD/YYYY HH:mm');
             },
 
             _refreshIntervalUpdated: function() {
@@ -298,95 +291,45 @@
             },
 
             _computeDurationText: function(from, to) {
-                function pluralize(type, count){
-                    if (count == 1)
-                        return type
-                    return type + 's';
-                }
-                if (to == 'now' && typeof from === 'string' && from.search("/") == -1) {
-                    var digits = parseInt(from.match(/\d+/g));
-                    var unit;
-                    if (from.search("y") > -1) {
-                        unit = pluralize("year", digits);
-                    } else if (from.search("month") > -1) {
-                        unit = pluralize("month", digits);
-                    } else if (from.search("d") > -1) {
-                        unit = pluralize("day", digits);
-                    } else if (from.search("h") > -1) {
-                        unit = pluralize("hour", digits);
-                    } else if (from.search("min") > -1 || from.indexOf(digits + 'm') > -1) {
-                        unit = pluralize("minute", digits);
-                    }
-
-                    return "Last " + digits + " " + unit;
-                } else if (to == 'now' && from.indexOf("/") > -1) {
-                    var seconds = Math.floor(new Date().getTime() / 1000) - Math.floor(new Date(from).getTime() / 1000);
-                    var numyears = Math.floor(seconds / 31536000);
-                    var numdays = Math.floor((seconds % 31536000) / 86400);
-                    var numhours = Math.floor(((seconds % 31536000) % 86400) / 3600);
-                    var numminutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
-                    var numseconds = (((seconds % 31536000) % 86400) % 3600) % 60;
-                    var text = "";
-                    //we have to check which value we are going to display in order to calc the ending "s"
-                    if (numyears > 0) {
-                        text += numyears + " " + pluralize("year", numyears);
-                    }
-                    if (numdays > 0) {
-                        text += " " + numdays + " " + pluralize("day", numdays);
-                    }
-                    if (numhours > 0) {
-                        text += " " + numhours + " " + pluralize("hour", numhours);
-                    }
-                    if (numminutes > 0) {
-                        text += " " + numminutes + " " + pluralize("minute", numminutes);
-                    }
-                    return "Last " + text;
-                } else {
-                    return from + " - " + to;
-                }
-            },
-
-            _computeMomentTo: function(to) {
-                if (!to)
-                    return;
-                // relative dates start with now or -
-                if (to.trim().startsWith('now') || to.trim().startsWith('-')) {
-                    return moment().relativeTime(to);
-                } else {
-                    return moment(to);
-                }
-            },
-
-            _computeMomentFrom: function(from) {
                 if (!from)
                     return;
+                var momentFrom = this._computeMoment(from), momentTo;
+
+                if (!to)
+                    momentTo = this._computeMoment("now");
+                else
+                    momentTo = this._computeMoment(to);
+                if (typeof this.to == "string" && this.to.trim().startsWith("now"))
+                    return ("Last " + momentFrom.fromNow(true)).replace(" an ", " ").replace(" a ", " ");
+
+                return momentFrom.format('MM/DD/YYYY HH:mm') + " - " + momentTo.format('MM/DD/YYYY HH:mm');
+            },
+
+            _computeMoment: function(m) {
                 // relative dates start with now or -
-                if (from.trim().startsWith('now') || from.trim().startsWith('-')) {
-                    return moment().relativeTime(from);
+                if (typeof m == 'string' && (m.trim().startsWith('now') || m.trim().startsWith('-'))) {
+                    return moment().relativeTime(m);
                 } else {
-                    return moment(from);
+                    return typeof m == "number" ? moment(m*1000) : moment(m) ;
                 }
             },
 
-            _computetimeRangeDurationInMinutes: function(momentFrom, momentTo){
+            _computetimeRangeDurationInMinutes: function(from, to){
+                var momentFrom = this._computeMoment(from),
+                    momentTo = this._computeMoment(to);
                 return Math.round((momentTo-momentFrom)/60000);
             },
 
             applyFrom: function() {
                 var dateFrom = this.querySelector('#pickDateFrom'),
                     timeFrom = this.querySelector('#pickTimeFrom');
-                this.selectedFrom = moment(dateFrom.date).format('MM/DD/YYYY');
-                this.selectedFrom += " " + moment(timeFrom.time.toString(), "hh:mm A").format('HH:mm');
+                this.selectedFrom = moment(dateFrom.date).format('MM/DD/YYYY ') + timeFrom.time;
             },
 
             applyTo: function() {
                 var dateTo = this.querySelector('#pickDateTo'),
                     timeTo = this.querySelector('#pickTimeTo');
-                this.selectedTo = moment(dateTo.date).format('MM/DD/YYYY');
-                this.selectedTo += " " + moment(timeTo.time.toString(), "hh:mm A").format('HH:mm');
-                if (this.selectedTo != "now" || this.selectedTo != Math.floor(new Date().getTime() / 1000)) {
-                    this.selectedRefreshInterval = 0;
-                }
+                this.selectedTo = moment(dateTo.date).format('MM/DD/YYYY ') + timeTo.time;
             },
 
             selectQuickRange: function(e) {
@@ -417,33 +360,35 @@
             },
 
             moveTimeRangeBack: function() {
-                this._clearRefreshInterval();
+                var momentFrom = this._computeMoment(this.from),
+                    momentTo = this._computeMoment(this.to);
                 // we're setting "to" to undefined to avoid triggering the observers until both "to" and "from" have final values
-                var newTo = moment(this.momentTo - this.timeRangeDurationInMinutes * 60000).format('MM/DD/YYYY HH:mm');
+                var newTo = moment(momentTo - this.timeRangeDurationInMinutes * 60000).unix();
                 this.to = undefined;
-                this.from = moment(this.momentFrom - this.timeRangeDurationInMinutes * 60000).format('MM/DD/YYYY HH:mm');
+                this.from = moment(momentFrom - this.timeRangeDurationInMinutes * 60000).unix();
                 this.to = newTo;
             },
 
             moveTimeRangeFwd: function() {
-              this._clearRefreshInterval();
-
-              // we'll start by setting "to" to undefined to avoid triggering the observers until both "to" and "from" have final values
-              if (moment(this.momentTo + this.timeRangeDurationInMinutes * 60000) > moment()){
-                  this.to = undefined;
-                  var newTo = 'now';
-                  this.from = moment(moment() - this.timeRangeDurationInMinutes * 60000).format('MM/DD/YYYY HH:mm');
-                  this.to = newTo;
-              } else {
-                  var newTo = moment(this.momentTo + this.timeRangeDurationInMinutes * 60000).format('MM/DD/YYYY HH:mm');
-                  this.to = undefined;
-                  this.from = moment(this.momentFrom + this.timeRangeDurationInMinutes * 60000).format('MM/DD/YYYY HH:mm');
-                  this.to = newTo;
-              }
+                var momentFrom = this._computeMoment(this.from),
+                    momentTo = this._computeMoment(this.to);
+                // we're setting "to" to undefined to avoid triggering the observers until both "to" and "from" have final values
+                if (moment(momentTo + this.timeRangeDurationInMinutes * 60000) > moment()){
+                    this.to = undefined;
+                    var newTo = 'now';
+                    this.from = moment(moment() - this.timeRangeDurationInMinutes * 60000).unix();
+                    this.to = newTo;
+                } else {
+                    var newTo = moment(momentTo + this.timeRangeDurationInMinutes * 60000).unix();
+                    this.to = undefined;
+                    this.from = moment(momentFrom + this.timeRangeDurationInMinutes * 60000).unix();
+                    this.to = newTo;
+                }
             },
 
             applyRange: function() {
-                this.refreshInterval = this.selectedRefreshInterval;
+                if (this.selectedRefreshInterval != this.refreshInterval)
+                    this.refreshInterval = this.selectedRefreshInterval;
                 var from, to;
                 if (typeof this.selectedTo === "number") {
                     var df = new Date(this.selectedFrom);
@@ -451,8 +396,15 @@
                     this.to = dt.getTime() / 1000;
                     this.from = df.getTime() / 1000;
                 } else {
-                    this.to = this.selectedTo;
-                    this.from = this.selectedFrom;
+                    if (this.selectedTo.indexOf('/') > -1)
+                        this.to = moment(this.selectedTo).unix();
+                    else
+                        this.to = this.selectedTo;
+
+                    if (this.selectedFrom.indexOf('/') > -1)
+                        this.from = moment(this.selectedFrom).unix();
+                    else
+                        this.from = this.selectedFrom;
                 }
             }
         });
