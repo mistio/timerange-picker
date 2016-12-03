@@ -354,7 +354,7 @@
                         this.selectedFrom = -from + "min";
                         break;
                 }
-                this.selectedRefreshInterval = e.model.item.refreshInterval;
+                this.selectedRefreshInterval = Number(e.model.item.refreshInterval);
                 this.selectedTo = "now";
             },
 
@@ -387,7 +387,7 @@
 
             applyRange: function() {
                 if (this.selectedRefreshInterval != this.refreshInterval)
-                    this.refreshInterval = this.selectedRefreshInterval;
+                    this.refreshInterval = Number(this.selectedRefreshInterval);
                 var from, to;
                 if (typeof this.selectedTo === "number") {
                     var df = new Date(this.selectedFrom);
