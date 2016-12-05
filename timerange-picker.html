@@ -17,6 +17,7 @@
 <link rel="import" href="../../bower_components/iron-icons/editor-icons.html">
 
 <script src='../../bower_components/moment/min/moment.min.js'></script>
+<script src='relative.time.parser.js'></script>
 
 <!--
 @demo demo/index.html
@@ -34,8 +35,7 @@
                 margin-bottom: 4px;
             }
 
-            paper-button#currenttimerange {
-                background-color: #eee;
+            paper-button#currentTimeRangeButton {
                 text-transform: none;
             }
 
@@ -88,28 +88,30 @@
                 display: block;
             }
         </style>
-        <paper-icon-button on-tap="minusDuration" icon="icons:chevron-left"></paper-icon-button>
-        <paper-button id="currenttimerange" toggles active="{{isMainDialogOpen}}" on-tap="_setInterval">{{durationText}}</paper-button>
-        <paper-icon-button id="plusButton" disabled="true" on-tap="plusDuration" icon="icons:chevron-right"></paper-icon-button>
+
+        <paper-icon-button on-tap="moveTimeRangeBack" icon="icons:chevron-left"></paper-icon-button>
+        <paper-button id="currentTimeRangeButton" toggles active="{{isMainDialogOpen}}">[[durationText]]</paper-button>
+        <paper-icon-button id="plusButton" disabled$="[[!_isFwdAllowed(to)]]" on-tap="moveTimeRangeFwd" icon="icons:chevron-right"></paper-icon-button>
+
         <paper-dialog opened="{{isMainDialogOpen}}" id="dialog" modal class="paper-time-picker-dialog">
             <div class="layout horizontal">
                 <div id="timerange">
                     <h3>Time Range</h3>
                     <div class="layout horizontal time-input">
-                        <paper-input class="flex" id="from" label="From" value="{{localFrom}}" on-tap="clearSelectedButton"></paper-input>
+                        <paper-input class="flex" id="from" label="From" value="{{selectedFrom}}"></paper-input>
                         <paper-icon-button class="from" toggles active="{{isFromDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
                     </div>
                     <div class="layout horizontal time-input">
-                        <paper-input class="flex" id="to" label="To" value="{{localTo}}" on-tap="clearSelectedButton"></paper-input>
+                        <paper-input class="flex" id="to" label="To" value="{{selectedTo}}"></paper-input>
                         <paper-icon-button class="to" toggles active="{{isToDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
                     </div>
-                    <paper-dropdown-menu id="refreshIntervalMenu" disabled$="{{_isRefreshAllowed(localTo)}}" label="refresh" placeholder="off">
-                        <paper-menu class="dropdown-content" selected="{{dropdownIntervalSelection}}" attr-for-selected="data-value">
+                    <paper-dropdown-menu id="refreshIntervalMenu" disabled$="[[!_isRefreshAllowed(selectedTo)]]" label="refresh" placeholder="off" no-animations>
+                        <paper-listbox class="dropdown-content" selected="{{selectedRefreshInterval}}" attr-for-selected="data-value">
                             <paper-item data-value=0>off</paper-item>
                             <paper-item data-value=10000>every 10sec</paper-item>
                             <paper-item data-value=60000>every 1min</paper-item>
                             <paper-item data-value=600000>every 10min</paper-item>
-                        </paper-menu>
+                        </paper-listbox>
                     </paper-dropdown-menu>
                 </div>
                 <div id="quickrange">
@@ -123,27 +125,25 @@
             </div>
             <hr/>
             <div class="layout horizontal buttons">
-                <paper-button dialog-dismiss on-tap="_resetInterval">Cancel</paper-button>
-                <paper-button dialog-confirm on-tap="addNewDate">Apply</paper-button>
+                <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button dialog-confirm on-tap="applyRange">Apply</paper-button>
             </div>
         </paper-dialog>
+
         <paper-dialog id="datetime" opened="{{isFromDialogOpen}}">
             <h2>Select from datetime</h2>
-            <div>
-                <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
-                <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
-            </div>
+            <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
+            <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
             <div class="pick-buttons">
                 <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
                 <paper-button dialog-dismiss>Cancel</paper-button>
             </div>
         </paper-dialog>
+
         <paper-dialog id="datetime" opened="{{isToDialogOpen}}">
             <h2>Select to datetime</h2>
-            <div>
-                <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
-                <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
-            </div>
+            <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
+            <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
             <div class="pick-buttons">
                 <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
                 <paper-button dialog-dismiss>Cancel</paper-button>
@@ -155,356 +155,86 @@
             is: 'timerange-picker',
 
             properties: {
-                isMainDialogOpen: Boolean,
-                isFromDialogOpen: Boolean,
-                isToDialogOpen: Boolean,
-                quickRanges: Array,
-                diff: {
-                    type: Number,
-                    value: 600000
-                },
-                endOfDiff: {
-                    type: Date
-                },
-                //local values are used so as to not trigger any outside-element functions that are trigger from not localized ones.
-                localFrom: {
-                    type: String
-                },
-                localTo: {
-                    type: String,
-                },
-                localRefresh: {
-                    type: Number,
-                    value: 0
-                },
                 from: {
                     type: String,
                     notify: true,
-                    observer: '_initTime'
+                    value: '',
+                    observer: '_fromUpdated'
                 },
                 to: {
                     type: String,
                     notify: true,
-                    observer: '_initTime'
-                },
-                durationText: {
-                    type: String,
-                    computed: '_computeDurationText(localFrom, localTo)'
+                    value: '',
+                    observer: '_toUpdated'
                 },
                 refreshInterval: {
                     type: Number,
-                    notify: true
-                }
-            },
-            _isRefreshAllowed: function(val) {
-                if (val == 'now') {
-                    return false;
-                } else {
-                    return true;
-                }
-            },
-            _clearInterval: function() {
-                this.dropdownIntervalSelection = 0;
-                this.refreshInterval = 0;
-            },
-            _setInterval: function() {
-                this.dropdownIntervalSelection = this.refreshInterval;
-                this.localRefresh = this.refreshInterval;
-                this.set('refreshInterval', 0);
-            },
-            _resetInterval: function() {
-                this.dropdownIntervalSelection = this.localRefresh;
-                this.refreshInterval = this.localRefresh;
-            },
-            ready: function() {
-                this.endOfDiff = new Date();
-                this.quickRanges = [{
-                    from: 10,
-                    to: "now",
-                    type: "minutes",
-                    text: "Last 10 minutes",
-                    refreshInterval: 10000
-                }, {
-                    from: 1,
-                    to: "now",
-                    type: "hour",
-                    text: "Last 1 hour",
-                    refreshInterval: 60000
-                }, {
-                    from: 6,
-                    to: "now",
-                    type: "hours",
-                    text: "Last 6 hours",
-                    refreshInterval: 600000
-                }, {
-                    from: 7,
-                    to: "now",
-                    type: "days",
-                    text: "Last 7 days",
-                    refreshInterval: 600000
-                }, {
-                    from: 30,
-                    to: "now",
-                    type: "days",
-                    text: "Last 30 days",
-                    refreshInterval: 600000
-                }, {
-                    from: 1,
-                    to: "now",
-                    type: "year",
-                    text: "Last 1 year",
-                    refreshInterval: 600000
-                }];
-            },
-            _computeDurationText: function(from, to) {
-                if (to == 'now' && typeof from === 'string' && from.search("/") == -1) {
-                    var digits = parseInt(from.match(/\d+/g));
-                    var unit;
-                    if (from.search("min") > -1) {
-                        unit = "minute" + this.numberEnding(digits);
-                    } else if (from.search("d") > -1) {
-                        unit = "day" + this.numberEnding(digits);
-                    } else if (from.search("y") > -1) {
-                        unit = "year" + this.numberEnding(digits);
-                    } else if (from.search("month") > -1) {
-                        unit = "month" + this.numberEnding(digits);
-                    } else if (from.search("h") > -1) {
-                        unit = "hour" + this.numberEnding(digits);
+                    notify: true,
+                    value: 0,
+                    observer: '_refreshIntervalUpdated'
+                },
+                selectedFrom: {
+                    type: String,
+                },
+                selectedTo: {
+                    type: String,
+                },
+                selectedRefreshInterval: {
+                    type: Number,
+                    value: 0
+                },
+                durationText: {
+                    type: String,
+                    computed: '_computeDurationText(from, to)'
+                },
+                timeRangeDurationInMinutes: {
+                    type: Number,
+                    computed: '_computetimeRangeDurationInMinutes(from, to)'
+                },
+                isMainDialogOpen: Boolean,
+                isFromDialogOpen: Boolean,
+                isToDialogOpen: Boolean,
+                quickRanges: {
+                    type: Array,
+                    value: function() {
+                        return [{
+                            from: 10,
+                            to: "now",
+                            type: "minutes",
+                            text: "Last 10 minutes",
+                            refreshInterval: 10000
+                        }, {
+                            from: 1,
+                            to: "now",
+                            type: "hour",
+                            text: "Last 1 hour",
+                            refreshInterval: 60000
+                        }, {
+                            from: 6,
+                            to: "now",
+                            type: "hours",
+                            text: "Last 6 hours",
+                            refreshInterval: 600000
+                        }, {
+                            from: 7,
+                            to: "now",
+                            type: "days",
+                            text: "Last 7 days",
+                            refreshInterval: 600000
+                        }, {
+                            from: 30,
+                            to: "now",
+                            type: "days",
+                            text: "Last 30 days",
+                            refreshInterval: 600000
+                        }, {
+                            from: 1,
+                            to: "now",
+                            type: "year",
+                            text: "Last 1 year",
+                            refreshInterval: 600000
+                        }];
                     }
-                    return "Last " + digits + " " + unit;
-                } else if (to == 'now' && from.search("/") > -1) {
-                    var seconds = Math.floor(new Date().getTime() / 1000) - Math.floor(new Date(from).getTime() / 1000);
-                    var numyears = Math.floor(seconds / 31536000);
-                    var numdays = Math.floor((seconds % 31536000) / 86400);
-                    var numhours = Math.floor(((seconds % 31536000) % 86400) / 3600);
-                    var numminutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
-                    var numseconds = (((seconds % 31536000) % 86400) % 3600) % 60;
-                    var text = "";
-                    //we have to check which value we are going to display in order to calc the ending "s"
-                    if (numyears > 0) {
-                        text += numyears + " year" + this.numberEnding(numyears);
-                    }
-                    if (numdays > 0) {
-                        text += numdays + " day" + this.numberEnding(numdays);
-                    }
-                    if (numhours > 0) {
-                        text += numhours + " hour" + this.numberEnding(numhours);
-                    }
-                    if (numminutes > 0) {
-                        text += numminutes + " minute" + this.numberEnding(numminutes);
-                    }
-                    return "Last " + text;
-                } else {
-                    return from + " - " + to;
-                }
-            },
-            numberEnding: function(number) {
-                return (number > 1) ? 's' : '';
-            },
-            _initTime: function(newValue, oldValue) {
-                if (this.localTo == null || this.localTo == "") {
-                    this.localTo = this.to;
-                    this.localFrom = this.from;
-                }
-                if (oldValue == null) {
-                    //in case we got timestamps
-                    if (typeof newValue != 'string') {
-                        if (this.from == newValue) {
-                            this.from = new Date(newValue);
-                        } else {
-                            this.to = new Date(newValue);
-                        }
-                    } else { //in case we got relative time
-                        var ret = newValue.replace('now-', '-');
-                        if (ret.search('min') == -1 && ret.search('month') == -1)
-                            ret = ret.replace('m', 'min');
-
-                        if (this.from == newValue) {
-                            this.from = ret;
-                        } else {
-                            this.to = ret;
-                        }
-                    }
-                }
-            },
-            applyFrom: function() {
-                var dateFrom = this.querySelector('#pickDateFrom'),
-                    timeFrom = this.querySelector('#pickTimeFrom');
-                this.localFrom = moment(dateFrom.date).format('MM/DD/YYYY');
-                this.localFrom += " " + moment(timeFrom.time.toString(), "hh:mm A").format('HH:mm');
-            },
-
-            applyTo: function() {
-                var dateTo = this.querySelector('#pickDateTo'),
-                    timeTo = this.querySelector('#pickTimeTo');
-                this.localTo = moment(dateTo.date).format('MM/DD/YYYY');
-                this.localTo += " " + moment(timeTo.time.toString(), "hh:mm A").format('HH:mm');
-                if (this.localTo != "now" || this.localTo != Math.floor(new Date().getTime() / 1000)) {
-                    this.dropdownIntervalSelection = 0;
-                }
-            },
-
-            selectQuickRange: function(e) {
-                var el = e.target;
-                var diff = 0;
-                var prevEl = this.querySelector('.range-button[selected="true"]');
-                if (prevEl)
-                    prevEl.setAttribute("selected", false);
-                el.setAttribute("selected", true);
-                var from = e.model.item.from;
-                var to = e.model.item.to;
-                var val = e.model.item.type;
-
-                var newDate = new Date();
-                switch (val) {
-                    case "days":
-                        this.localFrom = -from + "d";
-                        this.diff = from * 86400000;
-                        break;
-                    case "hour":
-                    case "hours":
-                        this.localFrom = -from + "h";
-                        this.diff = from * 3600000;
-                        break;
-                    case "year":
-                        this.localFrom = -from + "y";
-                        this.diff = from * 31556952000;
-                        break;
-                    case "minutes":
-                        this.localFrom = -from + "min";
-                        this.diff = from * 60000;
-                        break;
-                }
-                this.dropdownIntervalSelection = e.model.item.refreshInterval;
-                console.log(this.localFrom);
-                this.localTo = "now";
-                this.querySelector('#plusButton').setAttribute("disabled", "true");
-            },
-
-            minusDuration: function() {
-                this._clearInterval();
-                var diff, from, to;
-                if (typeof this.from === 'string') {
-                    from = this._relativetoTimestamp(this.from, "from");
-                } else {
-                    from = this.from;
-                }
-                if (typeof this.to === 'string' && this.to != 'now') {
-                    to = this._relativetoTimestamp(this.to, "to");
-                } else {
-                    to = this.to;
-                }
-                if (this.localTo == "now" || this.to == "now") {
-                    diff = this.diff;
-                    to = Math.floor(new Date().getTime() / 1000);
-                    from = to - this.diff / 1000;
-                } else {
-                    diff = to * 1000 - from * 1000;
-                    this.diff = diff;
-                }
-                this.querySelector('#plusButton').removeAttribute("disabled");
-                var start = new Date((from * 1000) - diff);
-                var end = new Date((to * 1000) - diff);
-                this.localTo = moment(end).format('MM/DD/YYYY HH:mm');
-                this.localFrom = moment(start).format('MM/DD/YYYY HH:mm');
-                this.to = Math.floor(end.getTime() / 1000);
-                this.from = Math.floor(start.getTime() / 1000);
-                console.log(this.localFrom, this.localTo)
-            },
-
-            plusDuration: function() {
-                this._clearInterval();
-                var diff, from, to;
-                if (typeof this.from === 'string') {
-                    //we need to calculate the timestamp in case e.g from=-2d and to=1d and he hits plus duration
-                    from = this._relativetoTimestamp(this.from, "from");
-                } else {
-                    from = this.from;
-                }
-                if (typeof this.to === 'string' && this.to != 'now') {
-                    to = this._relativetoTimestamp(this.to, "to");
-                } else {
-                    to = this.to;
-                }
-                diff = to * 1000 - from * 1000;
-                this.diff = diff;
-                var start = new Date((from * 1000 + diff));
-                var end = new Date((to * 1000 + diff));
-                if (new Date((to * 1000 + diff * 2)) >= new Date()) {
-                    this.querySelector('#plusButton').setAttribute("disabled", "true");
-                    this.to = "now"
-                    this.localTo = "now"
-                } else {
-                    this.localTo = moment(end).format('MM/DD/YYYY HH:mm');
-                }
-                this.localFrom = moment(start).format('MM/DD/YYYY HH:mm');
-                this.to = Math.floor(end.getTime() / 1000);
-                this.from = Math.floor(start.getTime() / 1000);
-            },
-
-            _relativetoTimestamp: function(relative, who) {
-                var timestamp = relative;
-                //we need to calculate what timestamp is "now" so we can calculate later the diff so that we can add/subtract it to move in time
-                if (who == "to" || this.localTo == "now" || (typeof relative === 'string' && relative.search("/") == -1)) {
-                    var now = Math.floor(new Date().getTime() / 1000);
-                } else if (who == "from" && this.localTo != "now") {
-                    if (this.localTo.search("/") > -1) {
-                        var now = Math.floor(new Date(this.localTo).getTime() / 1000);
-                    } else {
-                        var now = this.to;
-                    }
-                }
-                // in case we have xdays,xmin etc
-                if (relative.search("/") == -1 && relative != 'now') {
-                    var parsedDigits = parseInt(relative.match(/\d+/g));
-                    if (relative.search("y") >= 0) { // time in years
-                        timestamp = now - parsedDigits * 31556952;
-                    } else if (relative.search("month") >= 0) { // time in months
-                        timestamp = now - parsedDigits * 2629746;
-                    } else if (relative.search("d") >= 0) { // time in days
-                        timestamp = now - parsedDigits * 86400;
-                    } else if (relative.search("h") >= 0) { // time in hours
-                        timestamp = now - parsedDigits * 3600;
-                    } else if (relative.search("m") >= 0 || relative.search("min") >= 0) { // time in mins
-                        timestamp = now - parsedDigits * 60;
-                    } else { // time in secs
-                        timestamp = now - parsedDigits;
-                    }
-                    //in case we have xx/xx/xxxx format
-                } else if (relative != 'now') {
-                    timestamp = Math.floor(new Date(relative).getTime() / 1000);
-                }
-                //in all other occusions if any we have set timestamp=relative in the beginning
-                return timestamp;
-            },
-
-            clearSelectedButton: function() {
-                var prevEl = this.querySelector('.range-button[selected="true"]');
-                if (prevEl)
-                    prevEl.setAttribute("selected", false);
-            },
-
-            addNewDate: function() {
-                var start = this.$.from.value;
-                var end = this.$.to.value;
-                var selPickD = this.querySelector('.date-button[selected="true"]');
-                var selPickT = this.querySelector('.time-button[selected="true"]');
-                var selEl = this.querySelector('.range-button[selected="true"]');
-                this.refreshInterval = this.dropdownIntervalSelection;
-                var diff, from, to;
-                if (typeof this.localTo === "number") {
-                    var df = new Date(this.localFrom);
-                    var dt = new Date(this.localTo);
-                    this.to = dt.getTime() / 1000;
-                    this.from = (df.getTime() / 1000);
-
-                } else {
-                    this.to = this._relativetoTimestamp(this.localTo, "to");
-                    this.from = this._relativetoTimestamp(this.localFrom, "from");
-                    console.log(this.to, this.from, "////", this.localTo, this.localFrom)
-                }
-                if (this.to + (this.to - this.from) <= Math.floor(new Date().getTime() / 1000)) {
-                    this.querySelector('#plusButton').removeAttribute("disabled");
                 }
             },
 
@@ -515,6 +245,8 @@
                 // This is a good place to perform any work related to your element's
                 // visual state or active behavior (measuring sizes, beginning animations,
                 // loading resources, etc).
+                moment = initializeMomentRelative(moment);
+                console.debug('timerange-picker attached');
             },
 
             detached: function() {
@@ -522,7 +254,158 @@
                 // removed from a document.
                 //
                 // Use this to clean up anything you did in `attached`.
+                console.debug('timerange-picker detached');
             },
+
+            _isRefreshAllowed: function(selectedTo) {
+                if (!selectedTo || (typeof selectedTo == "string" && selectedTo.indexOf('now') == -1)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            },
+
+            _isFwdAllowed: function(to) {
+                if (typeof to == "string" && to.startsWith("now"))
+                    return false;
+                return true;
+            },
+
+            _fromUpdated: function() {
+                if (typeof this.from == 'string' && (this.from.trim().startsWith('now') || this.from.trim().startsWith('-'))) {
+                    this.selectedFrom = this.from;
+                } else
+                    this.selectedFrom = this._computeMoment(this.from).format('MM/DD/YYYY HH:mm');
+            },
+
+            _toUpdated: function() {
+                if (typeof this.to == 'string' && (this.to.trim().startsWith('now') || this.to.trim().startsWith('-'))) {
+                    this.selectedTo = this.to;
+                } else
+                    this.selectedTo = this._computeMoment(this.to).format('MM/DD/YYYY HH:mm');
+            },
+
+            _refreshIntervalUpdated: function() {
+                this.selectedRefreshInterval = this.refreshInterval;
+            },
+
+            _computeDurationText: function(from, to) {
+                if (!from)
+                    return;
+                var momentFrom = this._computeMoment(from), momentTo;
+
+                if (!to)
+                    momentTo = this._computeMoment("now");
+                else
+                    momentTo = this._computeMoment(to);
+                if (typeof this.to == "string" && this.to.trim().startsWith("now"))
+                    return ("Last " + momentFrom.fromNow(true)).replace(" an ", " ").replace(" a ", " ");
+
+                return momentFrom.format('MM/DD/YYYY HH:mm') + " - " + momentTo.format('MM/DD/YYYY HH:mm');
+            },
+
+            _computeMoment: function(m) {
+                // relative dates start with now or -
+                if (typeof m == 'string' && (m.trim().startsWith('now') || m.trim().startsWith('-'))) {
+                    return moment().relativeTime(m);
+                } else {
+                    return typeof m == "number" ? moment(m*1000) : moment(m) ;
+                }
+            },
+
+            _computetimeRangeDurationInMinutes: function(from, to){
+                var momentFrom = this._computeMoment(from),
+                    momentTo = this._computeMoment(to);
+                return Math.round((momentTo-momentFrom)/60000);
+            },
+
+            applyFrom: function() {
+                var dateFrom = this.querySelector('#pickDateFrom'),
+                    timeFrom = this.querySelector('#pickTimeFrom');
+                this.selectedFrom = moment(dateFrom.date).format('MM/DD/YYYY ') + timeFrom.time;
+            },
+
+            applyTo: function() {
+                var dateTo = this.querySelector('#pickDateTo'),
+                    timeTo = this.querySelector('#pickTimeTo');
+                this.selectedTo = moment(dateTo.date).format('MM/DD/YYYY ') + timeTo.time;
+            },
+
+            selectQuickRange: function(e) {
+                var el = e.target;
+                var diff = 0;
+                var from = e.model.item.from;
+                var to = e.model.item.to;
+                var val = e.model.item.type;
+
+                var newDate = new Date();
+                switch (val) {
+                    case "days":
+                        this.selectedFrom = -from + "d";
+                        break;
+                    case "hour":
+                    case "hours":
+                        this.selectedFrom = -from + "h";
+                        break;
+                    case "year":
+                        this.selectedFrom = -from + "y";
+                        break;
+                    case "minutes":
+                        this.selectedFrom = -from + "min";
+                        break;
+                }
+                this.selectedRefreshInterval = Number(e.model.item.refreshInterval);
+                this.selectedTo = "now";
+            },
+
+            moveTimeRangeBack: function() {
+                var momentFrom = this._computeMoment(this.from),
+                    momentTo = this._computeMoment(this.to);
+                // we're setting "to" to undefined to avoid triggering the observers until both "to" and "from" have final values
+                var newTo = moment(momentTo - this.timeRangeDurationInMinutes * 60000).unix();
+                this.to = undefined;
+                this.from = moment(momentFrom - this.timeRangeDurationInMinutes * 60000).unix();
+                this.to = newTo;
+            },
+
+            moveTimeRangeFwd: function() {
+                var momentFrom = this._computeMoment(this.from),
+                    momentTo = this._computeMoment(this.to);
+                // we're setting "to" to undefined to avoid triggering the observers until both "to" and "from" have final values
+                if (moment(momentTo + this.timeRangeDurationInMinutes * 60000) > moment()){
+                    this.to = undefined;
+                    var newTo = 'now';
+                    this.from = moment(moment() - this.timeRangeDurationInMinutes * 60000).unix();
+                    this.to = newTo;
+                } else {
+                    var newTo = moment(momentTo + this.timeRangeDurationInMinutes * 60000).unix();
+                    this.to = undefined;
+                    this.from = moment(momentFrom + this.timeRangeDurationInMinutes * 60000).unix();
+                    this.to = newTo;
+                }
+            },
+
+            applyRange: function() {
+                if (this.selectedRefreshInterval != this.refreshInterval)
+                    this.refreshInterval = Number(this.selectedRefreshInterval);
+                var from, to;
+                if (typeof this.selectedTo === "number") {
+                    var df = new Date(this.selectedFrom);
+                    var dt = new Date(this.selectedTo);
+                    this.to = dt.getTime() / 1000;
+                    this.from = df.getTime() / 1000;
+                } else {
+                    if (this.selectedTo.indexOf('/') > -1)
+                        this.to = moment(this.selectedTo).unix();
+                    else
+                        this.to = this.selectedTo;
+
+                    if (this.selectedFrom.indexOf('/') > -1)
+                        this.from = moment(this.selectedFrom).unix();
+                    else
+                        this.from = this.selectedFrom;
+                }
+            }
         });
     </script>
 </dom-module>
