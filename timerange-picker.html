@@ -74,6 +74,7 @@
 
             hr {
                 margin: 0;
+                opacity: 0.54;
             }
 
             paper-item {
@@ -87,6 +88,12 @@
             paper-icon-button {
                 display: block;
             }
+
+            .pick-buttons {
+                display: flex;
+                justify-content: flex-end;
+            }
+
         </style>
 
         <paper-icon-button on-tap="moveTimeRangeBack" icon="icons:chevron-left"></paper-icon-button>
@@ -131,22 +138,22 @@
         </paper-dialog>
 
         <paper-dialog id="datetime" opened="{{isFromDialogOpen}}">
-            <h2>Select from datetime</h2>
+            <h2>Select Start of Timerange</h2>
             <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
             <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
             <div class="pick-buttons">
-                <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
                 <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
             </div>
         </paper-dialog>
 
         <paper-dialog id="datetime" opened="{{isToDialogOpen}}">
-            <h2>Select to datetime</h2>
+            <h2>Select End of Timerange</h2>
             <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
             <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
             <div class="pick-buttons">
-                <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
                 <paper-button dialog-dismiss>Cancel</paper-button>
+                <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
             </div>
         </paper-dialog>
     </template>
