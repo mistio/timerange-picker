@@ -117,8 +117,8 @@
                         <paper-input class="flex" id="to" label="To" value="{{selectedTo}}"></paper-input>
                         <paper-icon-button class="to" toggles active="{{isToDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
                     </div>
-                    <paper-dropdown-menu id="refreshIntervalMenu" disabled$="[[!_isRefreshAllowed(selectedTo)]]" label="refresh" placeholder="off" no-animations>
-                        <paper-listbox class="dropdown-content" selected="{{selectedRefreshInterval}}" attr-for-selected="data-value">
+                    <paper-dropdown-menu id="refreshIntervalMenu" disabled$="[[!_isRefreshAllowed(selectedTo)]]" label="refresh" placeholder="off">
+                        <paper-listbox slot="dropdown-content" class="dropdown-content" selected="{{selectedRefreshInterval}}" attr-for-selected="data-value">
                             <paper-item data-value=0>off</paper-item>
                             <paper-item data-value=10000>every 10sec</paper-item>
                             <paper-item data-value=60000>every 1min</paper-item>
