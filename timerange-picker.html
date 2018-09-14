@@ -1,6 +1,4 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/paper-date-picker/paper-date-picker.html">
-<link rel="import" href="../../bower_components/paper-time-picker/paper-time-picker.html">
 <link rel="import" href="../../bower_components/paper-styles/paper-styles.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
@@ -144,8 +142,7 @@
 
         <paper-dialog id="datetime" opened="{{isFromDialogOpen}}">
             <h2>Select start of time range</h2>
-            <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
-            <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
+            <paper-input id="datetimeFrom" type="datetime-local"></paper-input>
             <div class="pick-buttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
                 <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
@@ -154,8 +151,7 @@
 
         <paper-dialog id="datetime" opened="{{isToDialogOpen}}">
             <h2>Select end of time range</h2>
-            <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
-            <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
+            <paper-input id="datetimeTo" type="datetime-local"></paper-input>
             <div class="pick-buttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
                 <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
@@ -333,15 +329,13 @@
             },
 
             applyFrom: function() {
-                var dateFrom = this.querySelector('#pickDateFrom'),
-                    timeFrom = this.querySelector('#pickTimeFrom');
-                this.selectedFrom = moment(dateFrom.date).format('MM/DD/YYYY ') + timeFrom.time;
+                var dateFrom = this.querySelector('#datetimeFrom'),
+                this.selectedTo = moment(dateFrom).utc().format('MM/DD/YYYY HH:mm:ss');
             },
 
             applyTo: function() {
-                var dateTo = this.querySelector('#pickDateTo'),
-                    timeTo = this.querySelector('#pickTimeTo');
-                this.selectedTo = moment(dateTo.date).format('MM/DD/YYYY ') + timeTo.time;
+                var dateTo = this.querySelector('#datetimeTo'),
+                this.selectedTo = moment(dateTo).utc().format('MM/DD/YYYY HH:mm:ss');
             },
 
             selectQuickRange: function(e) {
