@@ -108,7 +108,7 @@
                 <div id="timerange">
                     <h3>Time Range</h3>
                     <div class="layout horizontal time-input">
-                        <paper-input class="flex" id="from" label="From" value="{{selectedFrom}}"></paper-input>
+                        <paper-input class="flex" id="to" label="From" value="{{selectedFrom}}"></paper-input>
                         <paper-icon-button class="from" toggles active="{{isFromDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
                     </div>
                     <div class="layout horizontal time-input">
@@ -142,7 +142,7 @@
 
         <paper-dialog id="datetime" opened="{{isFromDialogOpen}}">
             <h2>Select start of time range</h2>
-            <paper-input id="datetimeFrom" type="datetime-local"></paper-input>
+            <paper-input id="datetimeFrom" type="datetime-local" label="[[_computeText(selectedFrom)]]" value="{{selectedFrom}}"></paper-input>
             <div class="pick-buttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
                 <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
@@ -151,7 +151,7 @@
 
         <paper-dialog id="datetime" opened="{{isToDialogOpen}}">
             <h2>Select end of time range</h2>
-            <paper-input id="datetimeTo" type="datetime-local"></paper-input>
+            <paper-input id="datetimeTo" type="datetime-local" label="[[_computeText(selectedTo)]]" value="{{selectedTo}}"></paper-input>
             <div class="pick-buttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
                 <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
@@ -247,6 +247,11 @@
                 }
             },
 
+            listeners: [
+                '_isFromDialogOpenChanged(isFromDialogOpen)',
+                '_isToDialogOpenChanged(isToDialogOpen)'
+            ],
+
             attached: function() {
                 // `attached` fires once the element and its parents have been inserted
                 // into a document.
@@ -264,6 +269,33 @@
                 //
                 // Use this to clean up anything you did in `attached`.
                 console.debug('timerange-picker detached');
+            },
+
+            _computeText: function(date) {
+                console.log('date',date);
+                if (!date) {
+                    return 'Select a date.';
+                } else if (typeof date == 'string' && (date.trim().startsWith('now') || date.trim().startsWith('-'))) {
+                    return moment().relativeTime(date) && moment().relativeTime(date).fromNow();
+                } else {
+                    return moment.utc(date).local().fromNow();
+                }
+            },
+
+            _isFromDialogOpenChanged: function(isFromDialogOpen) {
+                if (typeof this.selectedFrom == 'string' && (this.selectedFrom.trim().startsWith('now') || this.selectedFrom.trim().startsWith('-'))) {
+                    this.selectedFrom = moment().relativeTime(this.selectedFrom).format('MM/DD/YYYYTHH:mm');
+                } else {
+                    this.selectedFrom = moment.utc(this.selectedFrom).local().format('MM/DD/YYYYTHH:mm');
+                }
+            },
+
+            _isToDialogOpenChanged: function(isToDialogOpen) {
+                if (typeof this.selectedTo == 'string' && (this.selectedTo.trim().startsWith('now') || this.selectedTo.trim().startsWith('-'))) {
+                    this.selectedTo = moment().relativeTime(this.selectedTo).format('MM/DD/YYYYTHH:mm');
+                } else {
+                    this.selectedTo = moment.utc(this.selectedTo).local().format('MM/DD/YYYYTHH:mm');
+                }
             },
 
             _isRefreshAllowed: function(selectedTo) {
@@ -329,13 +361,11 @@
             },
 
             applyFrom: function() {
-                var dateFrom = this.querySelector('#datetimeFrom');
-                this.selectedTo = moment(dateFrom).utc().format('MM/DD/YYYY HH:mm:ss');
+                this.selectedFrom = moment(this.selectedFrom).utc().format('MM/DD/YYYY HH:mm:ss');
             },
 
             applyTo: function() {
-                var dateTo = this.querySelector('#datetimeTo');
-                this.selectedTo = moment(dateTo).utc().format('MM/DD/YYYY HH:mm:ss');
+                this.selectedTo = moment(this.selectedTo).utc().format('MM/DD/YYYY HH:mm:ss');
             },
 
             selectQuickRange: function(e) {
