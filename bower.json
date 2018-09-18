@@ -1,6 +1,6 @@
 {
   "name": "timerange-picker",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "authors": [
     "Maria Plakia <mplakia19@gmail.com>",
     "Dimitris Moraitis <dimo@mist.io>"
@@ -28,9 +28,7 @@
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.1.0",
     "paper-listbox": "polymerelements/paper-listbox#^2.1.0",
     "paper-item": "PolymerElements/paper-item#^2.1.0",
-    "iron-icons": "PolymerElements/iron-icons#^2.1.0",
-    "paper-date-picker": "bendavis78/paper-date-picker#1.2.2",
-    "paper-time-picker": "bendavis78/paper-time-picker#1.2.0-rc2"
+    "iron-icons": "PolymerElements/iron-icons#^2.1.0"
   },
   "devDependencies": {
     "iron-component-page": "PolymerElements/iron-component-page#^2.0.0",
