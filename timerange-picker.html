@@ -342,8 +342,9 @@
             _toUpdated: function() {
                 if (typeof this.to == 'string' && (this.to.trim().startsWith('now') || this.to.trim().startsWith('-'))) {
                     this.selectedTo = this.to;
-                } else
+                } else {
                     this.selectedTo = this._computeMoment(this.to).format('MM/DD/YYYY HH:mm');
+                }
             },
 
             _refreshIntervalUpdated: function() {
@@ -351,17 +352,19 @@
             },
 
             _computeDurationText: function(from, to) {
-                if (!from)
+                if (!from) {
                     return;
-                var momentFrom = this._computeMoment(from), momentTo;
-
-                if (!to)
+                }
+                var momentFrom = this._computeMoment(from),
+                    momentTo;
+                if (!to) {
                     momentTo = this._computeMoment("now");
-                else
+                } else {
                     momentTo = this._computeMoment(to);
-                if (typeof this.to == "string" && this.to.trim().startsWith("now"))
+                }
+                if (typeof this.to == "string" && this.to.trim().startsWith("now")){
                     return ("Last " + momentFrom.fromNow(true)).replace(" an ", " ").replace(" a ", " ");
-
+                }
                 return momentFrom.format('MM/DD/YYYY HH:mm') + " - " + momentTo.format('MM/DD/YYYY HH:mm');
             },
 
