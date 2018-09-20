@@ -1,6 +1,4 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/paper-date-picker/paper-date-picker.html">
-<link rel="import" href="../../bower_components/paper-time-picker/paper-time-picker.html">
 <link rel="import" href="../../bower_components/paper-styles/paper-styles.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
@@ -50,6 +48,10 @@
 
             paper-icon-button[disabled] {
                 opacity: 0.32;
+            }
+
+            paper-button[disabled] {
+                background-color: #ccc !important;
             }
 
             .time-input paper-icon-button {
@@ -110,11 +112,11 @@
                 <div id="timerange">
                     <h3>Time Range</h3>
                     <div class="layout horizontal time-input">
-                        <paper-input class="flex" id="from" label="From" value="{{selectedFrom}}"></paper-input>
+                        <paper-input class="flex" id="to" label="From [[_computeText(selectedFrom)]]" value="{{selectedFrom}}"></paper-input>
                         <paper-icon-button class="from" toggles active="{{isFromDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
                     </div>
                     <div class="layout horizontal time-input">
-                        <paper-input class="flex" id="to" label="To" value="{{selectedTo}}"></paper-input>
+                        <paper-input class="flex" id="to" label="To [[_computeText(selectedTo)]]" value="{{selectedTo}}"></paper-input>
                         <paper-icon-button class="to" toggles active="{{isToDialogOpen}}" icon="editor:insert-invitation"></paper-icon-button>
                     </div>
                     <paper-dropdown-menu id="refreshIntervalMenu" disabled$="[[!_isRefreshAllowed(selectedTo)]]" label="refresh" placeholder="off">
@@ -144,21 +146,19 @@
 
         <paper-dialog id="datetime" opened="{{isFromDialogOpen}}">
             <h2>Select start of time range</h2>
-            <paper-date-picker id="pickDateFrom" class="date-button"></paper-date-picker>
-            <paper-time-picker id="pickTimeFrom" class="time-button"></paper-time-picker>
+            <paper-input id="datetimeFrom" type="datetime-local" label="[[_computeText(temporaryFrom)]]" value="{{temporaryFrom}}" max="[[_getNow()]]" auto-validate></paper-input>
             <div class="pick-buttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
-                <paper-button dialog-confirm on-tap="applyFrom">Apply</paper-button>
+                <paper-button dialog-confirm on-tap="applyFrom" disabled="[[!_isValid(temporaryFrom)]]">Apply</paper-button>
             </div>
         </paper-dialog>
 
         <paper-dialog id="datetime" opened="{{isToDialogOpen}}">
             <h2>Select end of time range</h2>
-            <paper-date-picker id="pickDateTo" class="date-button"></paper-date-picker>
-            <paper-time-picker id="pickTimeTo" class="time-button"></paper-time-picker>
+            <paper-input id="datetimeTo" type="datetime-local" label="[[_computeText(temporaryTo)]]" value="{{temporaryTo}}" max="[[_getNow()]]" auto-validate></paper-input>
             <div class="pick-buttons">
                 <paper-button dialog-dismiss>Cancel</paper-button>
-                <paper-button dialog-confirm on-tap="applyTo">Apply</paper-button>
+                <paper-button dialog-confirm on-tap="applyTo" disabled="[[!_isValid(temporaryTo)]]">Apply</paper-button>
             </div>
         </paper-dialog>
     </template>
@@ -191,6 +191,12 @@
                 selectedTo: {
                     type: String,
                 },
+                temporaryFrom: {
+                    type: String,
+                },
+                temporaryTo: {
+                    type: String,
+                },
                 selectedRefreshInterval: {
                     type: Number,
                     value: 0
@@ -204,9 +210,15 @@
                     notify: true,
                     computed: '_computetimeRangeDurationInMinutes(from, to)'
                 },
-                isMainDialogOpen: Boolean,
-                isFromDialogOpen: Boolean,
-                isToDialogOpen: Boolean,
+                isMainDialogOpen: {
+                    type: Boolean
+                },
+                isFromDialogOpen:  {
+                    type: Boolean
+                },
+                isToDialogOpen:  {
+                    type: Boolean
+                },
                 quickRanges: {
                     type: Array,
                     value: function() {
@@ -251,6 +263,11 @@
                 }
             },
 
+            observers: [
+                '_isFromDialogOpenChanged(isFromDialogOpen)',
+                '_isToDialogOpenChanged(isToDialogOpen)'
+            ],
+
             attached: function() {
                 // `attached` fires once the element and its parents have been inserted
                 // into a document.
@@ -268,6 +285,37 @@
                 //
                 // Use this to clean up anything you did in `attached`.
                 console.debug('timerange-picker detached');
+            },
+
+            _getNow: function() {
+                console.log('_getNow', moment().format('MM/DD/YYYYTHH:mm'));
+                return moment().format('MM/DD/YYYYTHH:mm');
+            },
+
+            _computeText: function(date) {
+                if (!date) {
+                    return 'Select a date.';
+                } else if (typeof date == 'string' && (date.trim().startsWith('now') || date.trim().startsWith('-'))) {
+                    return moment().relativeTime(date) && moment().relativeTime(date).fromNow();
+                } else if (!moment(date).isValid()) {
+                    return '';
+                } else {
+                    return moment.utc(date).local().fromNow();
+                }
+            },
+
+            _isFromDialogOpenChanged: function(isFromDialogOpen) {
+                // console.log('isFromDialogOpen', isFromDialogOpen);
+                if (isFromDialogOpen) { //opened dialog
+                    this.set('temporaryFrom', this.selectedFrom.slice(0));
+                } 
+            },
+
+            _isToDialogOpenChanged: function(isToDialogOpen) {
+                // console.log('isFromDialogOpen', isToDialogOpen);
+                if (isToDialogOpen) { //opened dialog
+                    this.set('temporaryTo', this.selectedTo.slice(0));
+                }
             },
 
             _isRefreshAllowed: function(selectedTo) {
@@ -294,8 +342,9 @@
             _toUpdated: function() {
                 if (typeof this.to == 'string' && (this.to.trim().startsWith('now') || this.to.trim().startsWith('-'))) {
                     this.selectedTo = this.to;
-                } else
+                } else {
                     this.selectedTo = this._computeMoment(this.to).format('MM/DD/YYYY HH:mm');
+                }
             },
 
             _refreshIntervalUpdated: function() {
@@ -303,17 +352,19 @@
             },
 
             _computeDurationText: function(from, to) {
-                if (!from)
+                if (!from) {
                     return;
-                var momentFrom = this._computeMoment(from), momentTo;
-
-                if (!to)
+                }
+                var momentFrom = this._computeMoment(from),
+                    momentTo;
+                if (!to) {
                     momentTo = this._computeMoment("now");
-                else
+                } else {
                     momentTo = this._computeMoment(to);
-                if (typeof this.to == "string" && this.to.trim().startsWith("now"))
+                }
+                if (typeof this.to == "string" && this.to.trim().startsWith("now")){
                     return ("Last " + momentFrom.fromNow(true)).replace(" an ", " ").replace(" a ", " ");
-
+                }
                 return momentFrom.format('MM/DD/YYYY HH:mm') + " - " + momentTo.format('MM/DD/YYYY HH:mm');
             },
 
@@ -333,15 +384,13 @@
             },
 
             applyFrom: function() {
-                var dateFrom = this.querySelector('#pickDateFrom'),
-                    timeFrom = this.querySelector('#pickTimeFrom');
-                this.selectedFrom = moment(dateFrom.date).format('MM/DD/YYYY ') + timeFrom.time;
+                // console.log('applyFrom', this.temporaryFrom, moment(this.temporaryFrom).utc().format('MM/DD/YYYY HH:mm:ss'))
+                this.set('selectedFrom', moment(this.temporaryFrom).utc().format('MM/DD/YYYY HH:mm:ss'));
             },
 
             applyTo: function() {
-                var dateTo = this.querySelector('#pickDateTo'),
-                    timeTo = this.querySelector('#pickTimeTo');
-                this.selectedTo = moment(dateTo.date).format('MM/DD/YYYY ') + timeTo.time;
+                // console.log('applyTo', this.temporaryTo, moment(this.temporaryTo).utc().format('MM/DD/YYYY HH:mm:ss'))
+                this.set('selectedTo', moment(this.temporaryTo).utc().format('MM/DD/YYYY HH:mm:ss'));
             },
 
             selectQuickRange: function(e) {
@@ -418,6 +467,10 @@
                     else
                         this.from = this.selectedFrom;
                 }
+            },
+            _isValid: function(date) {
+                // console.log('isValid', date, moment(date).isValid());
+                return moment(date).isValid();
             }
         });
     </script>
