@@ -295,7 +295,7 @@
                 if (!date) {
                     return 'Select a date.';
                 } else if (typeof date == 'string' && (date.trim().startsWith('now') || date.trim().startsWith('-'))) {
-                    return moment().relativeTime(date) && moment().relativeTime(date).fromNow();
+                    return moment.utc(date).local().relativeTime(date) && moment.utc(date).local().relativeTime(date).fromNow();
                 } else if (!moment(date).isValid()) {
                     return '';
                 } else {
