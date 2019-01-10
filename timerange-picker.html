@@ -423,8 +423,8 @@
                 var momentFrom = this._computeMoment(this.from),
                     momentTo = this._computeMoment(this.to);
                 // we're setting "to" to undefined to avoid triggering the observers until both "to" and "from" have final values
+                // this.to = undefined;
                 var newTo = moment(momentTo - this.timeRangeDurationInMinutes * 60000).unix();
-                this.to = undefined;
                 this.from = moment(momentFrom - this.timeRangeDurationInMinutes * 60000).unix();
                 this.to = newTo;
             },
@@ -434,13 +434,13 @@
                     momentTo = this._computeMoment(this.to);
                 // we're setting "to" to undefined to avoid triggering the observers until both "to" and "from" have final values
                 if (moment(momentTo + this.timeRangeDurationInMinutes * 60000) > moment()){
-                    this.to = undefined;
+                    // this.to = undefined;
                     var newTo = 'now';
                     this.from = moment(moment() - this.timeRangeDurationInMinutes * 60000).unix();
                     this.to = newTo;
                 } else {
                     var newTo = moment(momentTo + this.timeRangeDurationInMinutes * 60000).unix();
-                    this.to = undefined;
+                    // this.to = undefined;
                     this.from = moment(momentFrom + this.timeRangeDurationInMinutes * 60000).unix();
                     this.to = newTo;
                 }
