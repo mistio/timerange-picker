@@ -1,6 +1,6 @@
 {
   "name": "timerange-picker",
-  "version": "0.3.0",
+  "version": "2.0.0",
   "authors": [
     "Maria Plakia <mplakia19@gmail.com>",
     "Dimitris Moraitis <dimo@mist.io>"
@@ -22,7 +22,7 @@
     "/test/"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.11.3",
+    "polymer": "Polymer/polymer#^2.6.0",
     "paper-dialog": "PolymerElements/paper-dialog#^2.1.1",
     "paper-input": "PolymerElements/paper-input#^2.2.0",
     "paper-dropdown-menu": "PolymerElements/paper-dropdown-menu#^2.1.0",
