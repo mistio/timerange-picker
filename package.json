@@ -9,7 +9,7 @@
     "range"
   ],
   "homepage": "https://github.com/mistio/timerange-picker/",
-  "name": "@polymer/timerange-picker",
+  "name": "@misto/timerange-picker",
   "version": "3.0.0-beta",
   "resolutions": {
     "inherits": "2.0.3",
@@ -24,13 +24,17 @@
   ],
   "license": "BSD-3-Clause",
   "dependencies": {
-    "@polymer/polymer": "^3.0.0",
-    "@polymer/paper-dialog": "^3.0.0",
-    "@polymer/paper-input": "^3.0.0",
-    "@polymer/paper-dropdown-menu": "^3.0.0",
-    "@polymer/paper-listbox": "^3.0.0",
-    "@polymer/paper-item": "^3.0.0",
-    "@polymer/iron-icons": "^3.0.0"
+    "@polymer/iron-icons": "^3.0.1",
+    "@polymer/paper-button": "^3.0.1",
+    "@polymer/paper-card": "^3.0.1",
+    "@polymer/paper-dialog": "^3.0.1",
+    "@polymer/paper-dropdown-menu": "^3.1.0",
+    "@polymer/paper-icon-button": "^3.0.2",
+    "@polymer/paper-input": "^3.2.1",
+    "@polymer/paper-item": "^3.0.1",
+    "@polymer/paper-listbox": "^3.0.1",
+    "@polymer/polymer": "^3.4.1",
+    "moment": "^2.27.0"
   },
   "devDependencies": {
     "@polymer/iron-component-page": "^4.0.0",
