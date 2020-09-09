@@ -14,7 +14,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <title>timerange-picker Demo</title>
     <script src="../../../bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
-    <link rel="import" href="../timerange-picker.html">
+    <script type="module" src="../timerange-picker.js"></script>
   </head>
   <body unresolved>
 
@@ -22,22 +22,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <timerange-picker> <!-- author='{"name": "Lord Meowser", "image": "http://lorempixel.com/g/300/200/cats/"}' fancy -->
 
     </timerange-picker>
-    <script>
-      // var seedElement = document.querySelector('timerange-picker');
-      //
-      // document.querySelector('#saybtn').addEventListener('click', function() {
-      //   // alert(seedElement.sayHello('Hallo!'));
-      // });
+    <script type="module">
+import '../timerange-picker.js';
+// var seedElement = document.querySelector('timerange-picker');
+//
+// document.querySelector('#saybtn').addEventListener('click', function() {
+//   // alert(seedElement.sayHello('Hallo!'));
+// });
 
-      // document.querySelector('#laserbtn').addEventListener('click', function() {
-      //   seedElement.fireLasers();
-      // });
+// document.querySelector('#laserbtn').addEventListener('click', function() {
+//   seedElement.fireLasers();
+// });
 
-      document.addEventListener("timerange-picker-lasers", function(e) {
-        console.log(e.detail.sound);
-      });
-
-    </script>
+document.addEventListener("timerange-picker-lasers", function(e) {
+  console.log(e.detail.sound);
+});
+</script>
 
   </body>
 </html>
