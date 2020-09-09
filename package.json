@@ -9,7 +9,7 @@
     "range"
   ],
   "homepage": "https://github.com/mistio/timerange-picker/",
-  "name": "@misto/timerange-picker",
+  "name": "@mistio/timerange-picker",
   "version": "3.0.0-beta",
   "resolutions": {
     "inherits": "2.0.3",
