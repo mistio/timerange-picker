@@ -119,21 +119,21 @@ initializeMomentRelative = function(moment) {
   from HTML and may be out of place here. Review them and
   then delete this comment!
 */
-import "./node_modules/@polymer/paper-styles/paper-styles.js"
-import "./node_modules/@polymer/iron-flex-layout/iron-flex-layout-classes.js"
-import "./node_modules/@polymer/paper-button/paper-button.js"
-import "./node_modules/@polymer/paper-icon-button/paper-icon-button.js"
-import "./node_modules/@polymer/paper-input/paper-input.js"
-import "./node_modules/@polymer/paper-card/paper-card.js"
-import "./node_modules/@polymer/paper-dialog/paper-dialog.js"
-import "./node_modules/@polymer/paper-dropdown-menu/paper-dropdown-menu.js"
-import "./node_modules/@polymer/paper-listbox/paper-listbox.js"
-import "./node_modules/@polymer/paper-item/paper-item.js"
-import "./node_modules/@polymer/iron-icons/iron-icons.js"
-import "./node_modules/@polymer/iron-icons/editor-icons.js"
-import { Polymer } from './node_modules/@polymer/polymer/lib/legacy/polymer-fn.js';
-import { html } from './node_modules/@polymer/polymer/lib/utils/html-tag.js';
-import moment from "./node_modules/moment/src/moment.js";
+import "@polymer/paper-styles/paper-styles.js"
+import "@polymer/iron-flex-layout/iron-flex-layout-classes.js"
+import "@polymer/paper-button/paper-button.js"
+import "@polymer/paper-icon-button/paper-icon-button.js"
+import "@polymer/paper-input/paper-input.js"
+import "@polymer/paper-card/paper-card.js"
+import "@polymer/paper-dialog/paper-dialog.js"
+import "@polymer/paper-dropdown-menu/paper-dropdown-menu.js"
+import "@polymer/paper-listbox/paper-listbox.js"
+import "@polymer/paper-item/paper-item.js"
+import "@polymer/iron-icons/iron-icons.js"
+import "@polymer/iron-icons/editor-icons.js"
+import { Polymer } from '@polymer/polymer/lib/legacy/polymer-fn.js';
+import { html } from '@polymer/polymer/lib/utils/html-tag.js';
+import moment from "moment/src/moment.js";
 
 Polymer({
   _template: html`
