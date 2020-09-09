@@ -10,7 +10,7 @@
   ],
   "homepage": "https://github.com/mistio/timerange-picker/",
   "name": "@polymer/timerange-picker",
-  "version": "- beta",
+  "version": "3.0.0-beta",
   "resolutions": {
     "inherits": "2.0.3",
     "samsam": "1.1.3",
