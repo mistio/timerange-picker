@@ -79,7 +79,7 @@
 
     }, initializeMomentRelative;
 
-    initializeMomentRelative = function(moment) {
+    export default initializeMomentRelative = function(moment) {
         moment.fn.relativeTime = function (relativeTimeString) {
             if (relativeTimeString.trim() === 'now') {
                 return moment();
